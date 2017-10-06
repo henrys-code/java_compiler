@@ -61,42 +61,53 @@ int currentLineNum, currentColNum;
  */
 %% 
 
-"\n"                  { currentLineNum++; currentColNum = 0; }
+"\n"                  { currentLineNum++; 
+                        currentColNum = 1; }
 
-"\r"                  { currentColNum = 0; }
+" "                   {}
 
-" "                   { currentColNum++; }
+"\t"                  {}
 
-"\t"                  { currentColNum+=TAB_SIZE; }
+"void"[ \n\t]+        { yylloc.last_column -= 1;
+                        return T_Void; }
 
-"void"                { return T_Void; }
+"boolean"[ \n\t]+     { yylloc.last_column -= 1;
+                        return T_Bool; }
 
-"boolean"[ \n\t]+     { return T_Bool; }
+"int"[ \n\t]+         { yylloc.last_column -= 1;
+                        return T_Int; }
 
-"int"[ \n\t]+         { return T_Int; }
+"while"[ \n\t]+       { yylloc.last_column -= 1;
+                        return T_While; }
 
-"while"[ \n\t]+       { return T_While; }
+"break"[; \n\t]+      { yylloc.last_column -= 1;
+                        return T_Break; }
 
-"break"[; \n\t]+      { return T_Break; }
+"continue"[; \n\t]+   { yylloc.last_column -= 1;
+                        return T_Continue; }
 
-"continue"[; \n\t]+   { return T_Continue; }
+"else"[{ \n\t]+       { yylloc.last_column -= 1;
+                        return T_Else; }
 
-"else"[{ \n\t]+       { return T_Else; }
+"for"[{ \n\t]+        { yylloc.last_column -= 1;
+                        return T_For; }
 
-"for"[{ \n\t]+        { return T_For; }
+"if"[{ \n\t]+         { yylloc.last_column -= 1;
+                        return T_If; }
 
-"if"[{ \n\t]+         { return T_If; }
-
-"return"[; \n\t]+     { return T_Return; }
+"return"[; \n\t]+     { yylloc.last_column -= 1;
+                        return T_Return; }
 
 [A-Za-z]+[0-9]*       { size_t len = strlen((char*) yylval.identifier);
                         memset(yylval.identifier, 0, len);
-                        strncpy(yylval.identifier, yytext, yyleng); return T_Identifier; }
+                        strncpy(yylval.identifier, yytext, yyleng);
+                        return T_Identifier; }
 
-[0-9]+              { yylval.integerConstant = atoi(yytext); return T_IntConstant; }
+[0-9]+                { yylval.integerConstant = atoi(yytext); 
+                        return T_IntConstant; }
 
 "true"|"false"        { yylval.boolConstant = (yytext[0] == 't');
-                         return T_BoolConstant; }
+                        return T_BoolConstant; }
 
 [A-Za-z]+[0-9]*"++"[; \n\t]+  { return T_Inc; }
 
@@ -122,43 +133,47 @@ int currentLineNum, currentColNum;
 
 "-="                  { return T_SubAssign; }
 
-"("                 { return T_LeftParen; }
+"("                   { return T_LeftParen; }
 
-")"                 { return T_RightParen; }
+")"                   { return T_RightParen; }
 
-"["               { return T_LeftBracket; }
+"["                   { return T_LeftBracket; }
 
-"]"                 { return T_RightBracket; }
+"]"                   { return T_RightBracket; }
 
-"{"                 { return T_LeftBrace; }
+"{"                   {  return T_LeftBrace; }
 
-"}"               { return T_RightBrace; }
+"}"                   { return T_RightBrace; }
 
-"="               { return T_Equal; }
+"="                   { return T_Equal; }
 
-";"               { return T_Semicolon; }
+";"                   { return T_Semicolon; }
 
-"-"                  { return T_Dash; }
+"-"                   { return T_Dash; }
 
-"+"                  { return T_Plus; }
+"+"                   { return T_Plus; }
 
-"*"                  { return T_Star; }
+"*"                   { return T_Star; }
 
-"/"                  { return T_Slash; }
+"/"                   { return T_Slash; }
 
-","                  { return T_Comma; }
+","                   { return T_Comma; }
 
-"<"                  { return T_LeftAngle; }
+"<"                   { return T_LeftAngle; }
 
-">"                  { return T_RightAngle; }
+">"                   { return T_RightAngle; }
 
-"public"[ \r\n\t]*    { return T_Public; }
+"public"[ \r\n\t]*    { yylloc.last_column -= 1;
+                        return T_Public; }
 
-"private"[ \r\n\t]*   { return T_Private; }
+"private"[ \r\n\t]*   { yylloc.last_column -= 1;
+                        return T_Private; }
 
-"static"[ \r\n\t]*    { return T_Static; }
+"static"[ \r\n\t]*    { yylloc.last_column -= 1;
+                        return T_Static; }
 
-"class"[ \r\n\t]*     { return T_Class; }
+"class"[ \r\n\t]*     { yylloc.last_column -= 1;
+                        return T_Class; }
 
 
 
