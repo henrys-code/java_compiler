@@ -61,6 +61,14 @@ int currentLineNum, currentColNum;
  */
 %% 
 
+"\n"                  { currentLineNum++; currentColNum = 0; }
+
+"\r"                  { currentColNum = 0; }
+
+" "                   { currentColNum++; }
+
+"\t"                  { currentColNum+=TAB_SIZE; }
+
 "void"                { return T_Void; }
 
 "boolean"[ \n\t]+     { return T_Bool; }
@@ -81,14 +89,81 @@ int currentLineNum, currentColNum;
 
 "return"[; \n\t]+     { return T_Return; }
 
-[A-Za-z]+[0-9]*       { strncpy(yylval.identifier, yytext, yyleng); return T_Identifier; }
+[A-Za-z]+[0-9]*       { size_t len = strlen((char*) yylval.identifier);
+                        memset(yylval.identifier, 0, len);
+                        strncpy(yylval.identifier, yytext, yyleng); return T_Identifier; }
 
--?[0-9]+              { yylval.integerConstant = atoi(yytext); return T_IntConstant; }                       
-
-
+[0-9]+              { yylval.integerConstant = atoi(yytext); return T_IntConstant; }
 
 "true"|"false"        { yylval.boolConstant = (yytext[0] == 't');
                          return T_BoolConstant; }
+
+[A-Za-z]+[0-9]*"++"[; \n\t]+  { return T_Inc; }
+
+[A-Za-z]+[0-9]*"--"[; \n\t]+  { return T_Dec; }
+
+"<="                  { return T_LessEqual; }
+
+">="                  { return T_GreaterEqual; }
+
+"=="                  { return T_EQ; }
+
+"!="                  { return T_NE; }
+
+"&&"                  { return T_And; }
+
+"||"                  { return T_Or; }
+
+"*="                  { return T_MulAssign; }
+
+"/="                  { return T_DivAssign; }
+
+"+="                  { return T_AddAssign; }
+
+"-="                  { return T_SubAssign; }
+
+"("                 { return T_LeftParen; }
+
+")"                 { return T_RightParen; }
+
+"["               { return T_LeftBracket; }
+
+"]"                 { return T_RightBracket; }
+
+"{"                 { return T_LeftBrace; }
+
+"}"               { return T_RightBrace; }
+
+"="               { return T_Equal; }
+
+";"               { return T_Semicolon; }
+
+"-"                  { return T_Dash; }
+
+"+"                  { return T_Plus; }
+
+"*"                  { return T_Star; }
+
+"/"                  { return T_Slash; }
+
+","                  { return T_Comma; }
+
+"<"                  { return T_LeftAngle; }
+
+">"                  { return T_RightAngle; }
+
+"public"[ \r\n\t]*    { return T_Public; }
+
+"private"[ \r\n\t]*   { return T_Private; }
+
+"static"[ \r\n\t]*    { return T_Static; }
+
+"class"[ \r\n\t]*     { return T_Class; }
+
+
+
+
+
 
 
 %%
