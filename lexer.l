@@ -59,6 +59,9 @@ int currentLineNum, currentColNum;
  * -----------
  * To make our rules more readable, we establish some definitions here.
  */
+
+%x comment
+
 %% 
 
 "\n"                  { currentLineNum++; 
@@ -67,6 +70,14 @@ int currentLineNum, currentColNum;
 " "                   {}
 
 "\t"                  {}
+
+"//"[^\n]*            {}
+
+"/*"                  { BEGIN(comment); }
+<comment>"\n"         { ++currentLineNum; }
+<comment>"*"+"/"      { BEGIN(INITIAL); }
+<comment>[^\n]*       {}
+<comment><<EOF>>      { ReportError::UntermComment(); BEGIN(INITIAL); }
 
 "void"[ \n\t]+        { yylloc.last_column -= 1;
                         return T_Void; }
@@ -163,16 +174,16 @@ int currentLineNum, currentColNum;
 
 ">"                   { return T_RightAngle; }
 
-"public"[ \r\n\t]*    { yylloc.last_column -= 1;
+"public"[ \r\n\t]+    { yylloc.last_column -= 1;
                         return T_Public; }
 
-"private"[ \r\n\t]*   { yylloc.last_column -= 1;
+"private"[ \r\n\t]+   { yylloc.last_column -= 1;
                         return T_Private; }
 
-"static"[ \r\n\t]*    { yylloc.last_column -= 1;
+"static"[ \r\n\t]+    { yylloc.last_column -= 1;
                         return T_Static; }
 
-"class"[ \r\n\t]*     { yylloc.last_column -= 1;
+"class"[ \r\n\t]+     { yylloc.last_column -= 1;
                         return T_Class; }
 
 
