@@ -67,9 +67,9 @@ int currentLineNum, currentColNum;
 "\n"                  { currentLineNum++; 
                         currentColNum = 1; }
 
-" "                   {}
+[ ]+                  {}
 
-"\t"                  {}
+"\t"                  { currentColNum = (currentColNum + (TAB_SIZE - (currentColNum%TAB_SIZE)) + 1); }
 
 "//"[^\n]*            {}
 
@@ -79,40 +79,35 @@ int currentLineNum, currentColNum;
 <comment>[^\n]*       {}
 <comment><<EOF>>      { ReportError::UntermComment(); BEGIN(INITIAL); }
 
-"void"[ \n\t]+        { yylloc.last_column -= 1;
+"void"[ \n\t]*        { yylloc.last_column -= 1;
                         return T_Void; }
 
-"boolean"[ \n\t]+     { yylloc.last_column -= 1;
+"boolean"[ \n\t]*     { yylloc.last_column -= 1;
                         return T_Bool; }
 
-"int"[ \n\t]+         { yylloc.last_column -= 1;
+"int"[ \n\t]*         { yylloc.last_column -= 1;
                         return T_Int; }
 
-"while"[ \n\t]+       { yylloc.last_column -= 1;
+"while"[ \n\t]*       { yylloc.last_column -= 1;
                         return T_While; }
 
-"break"[; \n\t]+      { yylloc.last_column -= 1;
+"break"[ \n\t]*      { yylloc.last_column -= 1;
                         return T_Break; }
 
-"continue"[; \n\t]+   { yylloc.last_column -= 1;
+"continue"[ \n\t]*   { yylloc.last_column -= 1;
                         return T_Continue; }
 
-"else"[{ \n\t]+       { yylloc.last_column -= 1;
+"else"[ \n\t]*       { yylloc.last_column -= 1;
                         return T_Else; }
 
-"for"[{ \n\t]+        { yylloc.last_column -= 1;
+"for"[ \n\t]*        { yylloc.last_column -= 1;
                         return T_For; }
 
-"if"[{ \n\t]+         { yylloc.last_column -= 1;
+"if"[ \n\t]*         { yylloc.last_column -= 1;
                         return T_If; }
 
-"return"[; \n\t]+     { yylloc.last_column -= 1;
+"return"[ \n\t]*     { yylloc.last_column -= 1;
                         return T_Return; }
-
-[A-Za-z]+[0-9]*       { size_t len = strlen((char*) yylval.identifier);
-                        memset(yylval.identifier, 0, len);
-                        strncpy(yylval.identifier, yytext, yyleng);
-                        return T_Identifier; }
 
 [0-9]+                { yylval.integerConstant = atoi(yytext); 
                         return T_IntConstant; }
@@ -120,9 +115,9 @@ int currentLineNum, currentColNum;
 "true"|"false"        { yylval.boolConstant = (yytext[0] == 't');
                         return T_BoolConstant; }
 
-[A-Za-z]+[0-9]*"++"[; \n\t]+  { return T_Inc; }
+"++"                  { return T_Inc; }
 
-[A-Za-z]+[0-9]*"--"[; \n\t]+  { return T_Dec; }
+"--"                  { return T_Dec; }
 
 "<="                  { return T_LessEqual; }
 
@@ -174,18 +169,24 @@ int currentLineNum, currentColNum;
 
 ">"                   { return T_RightAngle; }
 
-"public"[ \r\n\t]+    { yylloc.last_column -= 1;
+"public"[ \r\n\t]*    { yylloc.last_column -= 1;
                         return T_Public; }
 
-"private"[ \r\n\t]+   { yylloc.last_column -= 1;
+"private"[ \r\n\t]*   { yylloc.last_column -= 1;
                         return T_Private; }
 
-"static"[ \r\n\t]+    { yylloc.last_column -= 1;
+"static"[ \r\n\t]*    { yylloc.last_column -= 1;
                         return T_Static; }
 
-"class"[ \r\n\t]+     { yylloc.last_column -= 1;
+"class"[ \r\n\t]*     { yylloc.last_column -= 1;
                         return T_Class; }
 
+[A-Za-z]+[0-9]*       { size_t len = strlen((char*) yylval.identifier);
+                        memset(yylval.identifier, 0, len);
+                        strncpy(yylval.identifier, yytext, yyleng);
+                        return T_Identifier; }
+
+.                    { ReportError::UnrecogChar(yylloc, yytext[0];}
 
 
 
