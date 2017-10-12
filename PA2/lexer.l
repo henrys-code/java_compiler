@@ -184,10 +184,6 @@ int currentLineNum, currentColNum;
 .                    { ReportError::UnrecogChar(&yylloc, yytext[0]);}
 
 
-
-
-
-
 %%
 
 /* Function: InitLexer
