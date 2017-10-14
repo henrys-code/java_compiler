@@ -59,6 +59,10 @@ int currentLineNum, currentColNum;
 
 <COPY><<EOF>>         { yy_pop_state(); }
 
+<*>\n                 { currentLineNum++; currentColNum = 1;
+                        if (YYSTATE == COPY) savedLines.push_back("");
+                        else yy_push_state(COPY);}
+
 "\n"                  { currentLineNum++; 
                         currentColNum = 1; }
 
