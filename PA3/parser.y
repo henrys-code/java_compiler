@@ -45,6 +45,7 @@ void yyerror(const char *msg); // standard error-handling routine
     VarDecl 		*varDecl;
     List<VarDecl*>  *varDeclList;
     List<Decl*>     *declList;
+    List<Expr*>     *exprList;
     Decl            *decl;
     VarDeclError    *varDeclError;
     FnDecl 		    *fnDecl;
@@ -126,12 +127,12 @@ void yyerror(const char *msg); // standard error-handling routine
  */
 %type<program>          Program
 %type<declList>         DeclList
-%type<varDeclList>      parameter_declaration_list arg_list
+%type<varDeclList>      parameter_declaration_list
 %type<decl>             Decl
 %type<varDecl>          single_declaration paramater_declaraion
 %type<varType>          type_specifier
-%type<fnDecl>           function_definition function_prototype function_prototype_header function_identifier
-
+%type<fnDecl>           function_definition function_prototype function_prototype_header
+%type<identifier>       function_identifier
 %type<stmt>             statement simple_statement iteration_statement compound_statement_with_scope
 %type<expr>             condition expression expression_statement constant unary_expression postfix_expression primary_expression function_call_header_with_parameters func_call_expression function_call_header_no_parameters
 %type<ifStmt>           selection_statement
@@ -147,6 +148,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type<assignExpr>       assignment_expression
 %type<op>               assignment_operator
 %type<stmt_list>        statement_list
+%type<exprList>         arg_list
 
 %%
 /* Rules
@@ -256,7 +258,7 @@ expression  :   assignment_expression   { $$ = $1; }
             |   unary_expression        { $$ = $1; }
             ;
 
-assignment_expression   :   unary_expression assignment_operator expression { $$ = new Operator(@2, "=");}
+assignment_expression   :   unary_expression assignment_operator expression { $$ = new AssignExpr($1, new Operator(@2, "="), $3);}
                         ;
 
 assignment_operator : T_Equal       {$$ = new Operator(@1, "=");}
@@ -292,36 +294,36 @@ postfix_expression  :   primary_expression          { $$ = $1; }
                     |   func_call_expression        { $$ = $1; }
                     ;
 
-func_call_expression    :   function_call_header_with_parameters T_RightParen   {$$ = $1;}
-                        |   function_call_header_no_parameters T_RightParen     {$$ = $1;}
+func_call_expression    :   function_call_header_with_parameters T_RightParen   { $$ = $1; }
+                        |   function_call_header_no_parameters T_RightParen     { $$ = $1; }
                         ;
 
-function_call_header_no_parameters  :   function_identifier T_LeftParen T_Void   {$$ = (new Call(@1, NULL, $1, new List<Expr*>()));}
-                                    |   function_identifier T_LeftParen          {$$ = (new Call(@1, NULL, $1, new List<Expr*>()));}
+function_call_header_no_parameters  :   function_identifier T_LeftParen T_Void   { $$ = new Call(@1, NULL, new Identifier(@1, $1), new List<Expr*>()); }
+                                    |   function_identifier T_LeftParen          { $$ = new Call(@1, NULL, new Identifier(@1, $1), new List<Expr*>()); }
                                     ;
 
-function_call_header_with_parameters    :   function_identifier T_LeftParen arg_list {$$ = (new Call(@1, NULL, $1, $3));}
+function_call_header_with_parameters    :   function_identifier T_LeftParen arg_list { $$ = new Call(@1, NULL, new Identifier(@1, $1), $3); }
                                         ;
 
 arg_list    :   assignment_expression                   { ($$ = new List<Expr*>())->Append($1); }
-            |   arg_list T_Comma assignment_expression  {($$ = $1)->Append($3);}
-            |   primary_expression                      {($$ = new List<Expr*>())->Append($1);}
-            |   arg_list T_Comma primary_expression     {($$ = $1)->Append($3);}
+            |   arg_list T_Comma assignment_expression  { ($$ = $1)->Append($3); }
+            |   primary_expression                      { ($$ = new List<Expr*>())->Append($1); }
+            |   arg_list T_Comma primary_expression     { ($$ = $1)->Append($3); }
             ;
 
-function_identifier  :   T_Identifier    {$$ = new Identifier(@1, $1);}
+function_identifier :   T_Identifier    { $$ = new Identifier(@1, $1); }
                     ;
 
-primary_expression  :   T_Identifier    {$$ = new Identifier(@1, $1);}
-                    |   constant        {$$ = $1;}
-                    |   T_LeftParen expression T_RightParen {$$ = $2;}
+primary_expression  :   T_Identifier    { $$ = new Identifier(@1, $1); }
+                    |   constant        { $$ = $1; }
+                    |   T_LeftParen expression T_RightParen { $$ = $2; }
                     ;
 
-unary_expression    :   postfix_expression      {$$ = $1}
-                    |   T_Inc unary_expression  {$$ = new ArithmeticExpr(new Operator(@1, "++"), $2);}
-                    |   T_Dec unary_expression  {$$ = new ArithmeticExpr(new Operator(@1, "--"), $2);}
-                    |   T_Plus unary_expression {$$ = new ArithmeticExpr(new IntConstant(@1, 1), new Operator(@1, "*"), $2);}
-                    |   T_Dash unary_expression {$$ = new ArithmeticExpr(new IntConstant(@1, -1), new Operator(@1, "*"), $2);}
+unary_expression    :   postfix_expression      { $$ = $1; }
+                    |   T_Inc unary_expression  { $$ = new ArithmeticExpr(new Operator(@1, "++"), $2); }
+                    |   T_Dec unary_expression  { $$ = new ArithmeticExpr(new Operator(@1, "--"), $2); }
+                    |   T_Plus unary_expression { $$ = new ArithmeticExpr(new IntConstant(@1, 1), new Operator(@1, "*"), $2); }
+                    |   T_Dash unary_expression { $$ = new ArithmeticExpr(new IntConstant(@1, -1), new Operator(@1, "*"), $2); }
                     ;
 
 constant    :   T_IntConstant   { $$ = new IntConstant(@1, $1);  }
