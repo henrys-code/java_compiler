@@ -39,14 +39,13 @@ void yyerror(const char *msg); // standard error-handling routine
  *      attributes to your non-terminal symbols.
  */
 %union {
-    int integerConstant;
-    bool boolConstant;
-    char identifier[MaxIdentLen+1]; // +1 for terminating null
+    int             integerConstant;
+    bool            boolConstant;
+    char            identifier[MaxIdentLen+1]; // +1 for terminating null
     VarDecl 		*varDecl;
     Decl            *decl;
-    //VarDeclError 	*varDeclError;
+    VarDeclError    *varDeclError;
     FnDecl 		    *fnDecl;
-    /*
     FormalsError 	*formalsError;
     ExprError 		*exprError;
     EmptyExpr 		*emptyExpr;
@@ -78,11 +77,11 @@ void yyerror(const char *msg); // standard error-handling routine
     Operator 		*operator;
     BoolConstant 	*boolConstant;
     IntConstant		*intConstant;
-    */
+    Type            *varType;
 
-
-
-
+    //the ones i added
+    //statement_list  *stmtList;
+    Operator        *operator;
 }
 
 /* Tokens
@@ -102,9 +101,9 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   T_LeftParen T_RightParen T_LeftBracket T_RightBracket T_LeftBrace T_RightBrace
 %token   T_Public T_Private T_Static T_Class
 
-%token   T_Identifier
-%token   T_IntConstant
-%token   T_BoolConstant
+%token   <identfier> T_Identifier
+%token   <integerConstang>T_IntConstant
+%token   <boolConstant>T_BoolConstant
 
 %nonassoc LOWEST
 %nonassoc LOWER_THAN_ELSE
@@ -130,10 +129,27 @@ void yyerror(const char *msg); // standard error-handling routine
  * of the union named "declList" which is of type List<Decl*>.
  * pp2: You'll need to add many of these of your own.
  */
-%type<declList>  DeclList
-%type<decl>      Decl
-%type<varDecl>   single_declaration
-%type<fnDecl>    function_definition
+%type<program>          Program
+%type<declList>         DeclList parameter_declaration_list arg_list
+%type<decl>             Decl
+%type<varDecl>          single_declaration paramater_declaraion
+%type<varType>          type_specifier
+%type<fnDecl>           function_definition function_prototype function_prototype_header function_identfier
+%type<stmtBlock>        statement_list
+%type<stmt>             statement simple_statement iteration_statement compound_statement_with_scope
+%type<expr>             condition expression expression_statement constant unary_expression postfix_expression primary_expression function_call_header_with_parameters func_call_expression function_call_header_no_parameters
+%type<ifStmt>           selection_statement
+%type<whileStmt>        while_statement
+%type<forStmt>          for_statement
+%type<arithmeticExpr>   arithmetic_expression
+%type<relationalExpr>   relational_expression
+%type<equalityExpr>     equality_expression
+%type<logicalExpr>      logical_expression
+%type<returnStmt>       return_statement
+%type<declStmt>         decl_statement
+%type<breakStmt>        break_statement
+%type<assignExpr>       assignment_expression
+%type<operator>         assignment_operator
 
 %%
 /* Rules
