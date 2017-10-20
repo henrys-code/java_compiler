@@ -148,28 +148,31 @@ union YYSTYPE
 {
 #line 41 "parser.y" /* yacc.c:1909  */
 
-    int integerConstant;
-    bool boolConstant;
-    char identifier[MaxIdentLen+1]; // +1 for terminating null
+    int             integerConstant;
+    bool            boolConstant;
+    char            identifier[MaxIdentLen+1]; // +1 for terminating null
     VarDecl 		*varDecl;
+    List<VarDecl*>  *varDeclList;
+    List<Decl*>     *declList;
     Decl            *decl;
-    //VarDeclError 	*varDeclError;
+    VarDeclError    *varDeclError;
     FnDecl 		    *fnDecl;
-    /*
     FormalsError 	*formalsError;
     ExprError 		*exprError;
     EmptyExpr 		*emptyExpr;
     ArithmeticExpr 	*arithmeticExpr;
     RelationalExpr 	*relationalExpr;
     EqualityExpr 	*equalityExpr;
-    LogicalExpr		*logicalExpr	
+    LogicalExpr		*logicalExpr;	
     SelectionExpr	*selectionExpr;
     AssignExpr      *assignExpr;
     PostfixExpr     *postfixExpr;
     Call            *call;
+    Operator 		*op;
     VarExpr         *varExpr;
     Program         *program;
     Stmt            *stmt;
+    List<Stmt*>     *stmt_list;
     StmtBlock       *stmtBlock;
     ConditionalStmt *conditionalStmt;
     LoopStmt        *loopStmt;
@@ -181,19 +184,10 @@ union YYSTYPE
     ReturnStmt      *returnStmt;
     DeclStmt        *declStmt;
     CompoundExpr 	*compoundExpr;
-    DeclList		*declList;
-    Decl		    *decl;
     Expr 		    *expr;
-    Operator 		*operator;
-    BoolConstant 	*boolConstant;
-    IntConstant		*intConstant;
-    */
+    Type            *varType;
 
-
-
-
-
-#line 197 "y.tab.h" /* yacc.c:1909  */
+#line 191 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

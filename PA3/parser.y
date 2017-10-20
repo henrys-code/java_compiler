@@ -43,6 +43,8 @@ void yyerror(const char *msg); // standard error-handling routine
     bool            boolConstant;
     char            identifier[MaxIdentLen+1]; // +1 for terminating null
     VarDecl 		*varDecl;
+    List<VarDecl*>  *varDeclList;
+    List<Decl*>     *declList;
     Decl            *decl;
     VarDeclError    *varDeclError;
     FnDecl 		    *fnDecl;
@@ -52,14 +54,16 @@ void yyerror(const char *msg); // standard error-handling routine
     ArithmeticExpr 	*arithmeticExpr;
     RelationalExpr 	*relationalExpr;
     EqualityExpr 	*equalityExpr;
-    LogicalExpr		*logicalExpr	
+    LogicalExpr		*logicalExpr;	
     SelectionExpr	*selectionExpr;
     AssignExpr      *assignExpr;
     PostfixExpr     *postfixExpr;
     Call            *call;
+    Operator 		*op;
     VarExpr         *varExpr;
     Program         *program;
     Stmt            *stmt;
+    List<Stmt*>     *stmt_list;
     StmtBlock       *stmtBlock;
     ConditionalStmt *conditionalStmt;
     LoopStmt        *loopStmt;
@@ -71,17 +75,8 @@ void yyerror(const char *msg); // standard error-handling routine
     ReturnStmt      *returnStmt;
     DeclStmt        *declStmt;
     CompoundExpr 	*compoundExpr;
-    DeclList		*declList;
-    Decl		    *decl;
     Expr 		    *expr;
-    Operator 		*operator;
-    BoolConstant 	*boolConstant;
-    IntConstant		*intConstant;
     Type            *varType;
-
-    //the ones i added
-    //statement_list  *stmtList;
-    Operator        *operator;
 }
 
 /* Tokens
@@ -101,8 +96,8 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   T_LeftParen T_RightParen T_LeftBracket T_RightBracket T_LeftBrace T_RightBrace
 %token   T_Public T_Private T_Static T_Class
 
-%token   <identfier> T_Identifier
-%token   <integerConstang>T_IntConstant
+%token   <identifier> T_Identifier
+%token   <integerConstant>T_IntConstant
 %token   <boolConstant>T_BoolConstant
 
 %nonassoc LOWEST
@@ -130,12 +125,13 @@ void yyerror(const char *msg); // standard error-handling routine
  * pp2: You'll need to add many of these of your own.
  */
 %type<program>          Program
-%type<declList>         DeclList parameter_declaration_list arg_list
+%type<declList>         DeclList
+%type<varDeclList>      parameter_declaration_list arg_list
 %type<decl>             Decl
 %type<varDecl>          single_declaration paramater_declaraion
 %type<varType>          type_specifier
-%type<fnDecl>           function_definition function_prototype function_prototype_header function_identfier
-%type<stmtBlock>        statement_list
+%type<fnDecl>           function_definition function_prototype function_prototype_header function_identifier
+
 %type<stmt>             statement simple_statement iteration_statement compound_statement_with_scope
 %type<expr>             condition expression expression_statement constant unary_expression postfix_expression primary_expression function_call_header_with_parameters func_call_expression function_call_header_no_parameters
 %type<ifStmt>           selection_statement
@@ -149,7 +145,8 @@ void yyerror(const char *msg); // standard error-handling routine
 %type<declStmt>         decl_statement
 %type<breakStmt>        break_statement
 %type<assignExpr>       assignment_expression
-%type<operator>         assignment_operator
+%type<op>               assignment_operator
+%type<stmt_list>        statement_list
 
 %%
 /* Rules
@@ -183,7 +180,7 @@ type_specifier  : T_Void     {$$ = Type::voidType;}
                 | T_Bool     {$$ = Type::boolType;}    
                 ;
 
-function_definition : function_prototype compound_statement_with_scope      { $$ = $1->SetFunctionBody($2); }
+function_definition : function_prototype compound_statement_with_scope      { ($$ = $1)->SetFunctionBody($2); }
                     | function_prototype T_Semicolon                        { $$ = $1; }
                     ;
 
@@ -201,7 +198,7 @@ parameter_declaration_list  :   parameter_declaration_list T_Comma  paramater_de
 paramater_declaraion        :   type_specifier T_Identifier { $$ = new VarDecl(new Identifier(@2, $2), $1); }
                             ;
 
-compound_statement_with_scope   :   T_LeftBrace statement_list  T_RightBrace    { $$ = $2; }
+compound_statement_with_scope   :   T_LeftBrace statement_list  T_RightBrace    { $$ = new StmtBlock($2); }
                                 |   T_LeftBrace T_RightBrace                    {}
                                 ;
 
@@ -239,7 +236,7 @@ while_statement :   T_While T_LeftParen condition T_RightParen statement    { $$
 for_statement   :   T_For T_LeftParen expression_statement expression_statement expression T_RightParen statement   {$$ = new ForStmt($3, $4, $5, $7); }
                 ;
 
-condition   :  expression   { $$ = $1 ); }
+condition   :  expression   { $$ = $1; }
             ;
 
 return_statement    :   T_Return expression_statement   {$$ = new ReturnStmt(@1, $2); }
@@ -259,39 +256,39 @@ expression  :   assignment_expression   { $$ = $1; }
             |   unary_expression        { $$ = $1; }
             ;
 
-assignment_expression   :   unary_expression assignment_operator expression { $$ = new Operator(@1, "?")}
+assignment_expression   :   unary_expression assignment_operator expression { $$ = new Operator(@2, "=");}
                         ;
 
-assignment_operator : T_Equal       {$$ = new Operator(@1, "?"}
-                    | T_MulAssign   {$$ = new Operator(@1, "?"}
-                    | T_DivAssign   {$$ = new Operator(@1, "?"}
-                    | T_AddAssign   {$$ = new Operator(@1, "?"}
-                    | T_SubAssign   {$$ = new Operator(@1, "?"}
+assignment_operator : T_Equal       {$$ = new Operator(@1, "=");}
+                    | T_MulAssign   {$$ = new Operator(@1, "*=");}
+                    | T_DivAssign   {$$ = new Operator(@1, "/=");}
+                    | T_AddAssign   {$$ = new Operator(@1, "+=");}
+                    | T_SubAssign   {$$ = new Operator(@1, "-=");}
                     ;
 
-arithmetic_expression   :   expression T_Plus expression    { $$ = new ArithmeticExpr($1,$2,$3); }
-                        |   expression T_Dash expression    { $$ = new ArithmeticExpr($1,$2,$3); }
-                        |   expression T_Star expression    { $$ = new ArithmeticExpr($1,$2,$3); }
-                        |   expression T_Slash expression   { $$ = new ArithmeticExpr($1,$2,$3); }
+arithmetic_expression   :   expression T_Plus expression    { $$ = new ArithmeticExpr($1,new Operator(@2, "+"),$3); }
+                        |   expression T_Dash expression    { $$ = new ArithmeticExpr($1,new Operator(@2, "-"),$3); }
+                        |   expression T_Star expression    { $$ = new ArithmeticExpr($1,new Operator(@2, "*"),$3); }
+                        |   expression T_Slash expression   { $$ = new ArithmeticExpr($1,new Operator(@2, "/"),$3); }
                         ;
 
-relational_expression   :   expression T_LeftAngle expression   {$$ = new RelationalExpr($1,$2,$3);}
-                        |   expression T_RightAngle expression  {$$ = new RelationalExpr($1,$2,$3);}
-                        |   expression T_LessEqual expression   {$$ = new RelationalExpr($1,$2,$3);}
-                        |   expression T_GreaterEqual expression{$$ = new RelationalExpr($1,$2,$3);}
+relational_expression   :   expression T_LeftAngle expression   {$$ = new RelationalExpr($1,new Operator(@2, "<"),$3);}
+                        |   expression T_RightAngle expression  {$$ = new RelationalExpr($1,new Operator(@2, ">"),$3);}
+                        |   expression T_LessEqual expression   {$$ = new RelationalExpr($1,new Operator(@2, "<="),$3);}
+                        |   expression T_GreaterEqual expression{$$ = new RelationalExpr($1,new Operator(@2, ">="),$3);}
                         ;
 
-equality_expression :   expression T_EQ expression  {$$ = new EqualityExpr($1,$2,$3);}
-                    |   expression T_NE expression  {$$ = new EqualityExpr($1,$2,$3);}
+equality_expression :   expression T_EQ expression  {$$ = (new EqualityExpr($1,new Operator(@2, "=="),$3));}
+                    |   expression T_NE expression  {$$ = (new EqualityExpr($1,new Operator(@2, "!="),$3));}
                     ;
 
-logical_expression  :   expression T_And expression {$$ = new LogicalExpr($1,$2,$3);}
-                    |   expression T_Or expression  {$$ = new LogicalExpr($1,$2,$3);}
+logical_expression  :   expression T_And expression {$$ = (new LogicalExpr($1,new Operator(@2, "&&"),$3));}
+                    |   expression T_Or expression  {$$ = (new LogicalExpr($1,new Operator(@2, "||"),$3));}
                     ;
 
 postfix_expression  :   primary_expression          { $$ = $1; }
-                    |   postfix_expression T_Inc    { $$ = new PostfixExpr($1, new Operator(@2, $2); }
-                    |   postfix_expression T_Dec    { $$ = new PostfixExpr($1, new Operator(@2, $2); }
+                    |   postfix_expression T_Inc    { $$ = (new PostfixExpr($1, new Operator(@2, "++"))); }
+                    |   postfix_expression T_Dec    { $$ = (new PostfixExpr($1, new Operator(@2, "--"))); }
                     |   func_call_expression        { $$ = $1; }
                     ;
 
@@ -299,20 +296,20 @@ func_call_expression    :   function_call_header_with_parameters T_RightParen   
                         |   function_call_header_no_parameters T_RightParen     {$$ = $1;}
                         ;
 
-function_call_header_no_parameters  :   function_identfier T_LeftParen T_Void   {$$ = new Call(@1, NULL, $1, new List<Expr*>());}
-                                    |   function_identfier T_LeftParen          {$$ = new Call(@1, NULL, $1, new List<Expr*>());}
+function_call_header_no_parameters  :   function_identifier T_LeftParen T_Void   {$$ = (new Call(@1, NULL, $1, new List<Expr*>()));}
+                                    |   function_identifier T_LeftParen          {$$ = (new Call(@1, NULL, $1, new List<Expr*>()));}
                                     ;
 
-function_call_header_with_parameters    :   function_identfier T_LeftParen arg_list {$$ = new Call(@1, NULL, $1, $3);}
+function_call_header_with_parameters    :   function_identifier T_LeftParen arg_list {$$ = (new Call(@1, NULL, $1, $3));}
                                         ;
 
 arg_list    :   assignment_expression                   { ($$ = new List<Expr*>())->Append($1); }
-            |   arg_list T_Comma assignment_expression  {$$ = $1->Append($3);}
+            |   arg_list T_Comma assignment_expression  {($$ = $1)->Append($3);}
             |   primary_expression                      {($$ = new List<Expr*>())->Append($1);}
-            |   arg_list T_Comma primary_expression     {$$ = $1->Append($3);}
+            |   arg_list T_Comma primary_expression     {($$ = $1)->Append($3);}
             ;
 
-function_identfier  :   T_Identifier    {$$ = new Identifier(@1, $1);}
+function_identifier  :   T_Identifier    {$$ = new Identifier(@1, $1);}
                     ;
 
 primary_expression  :   T_Identifier    {$$ = new Identifier(@1, $1);}
@@ -321,10 +318,10 @@ primary_expression  :   T_Identifier    {$$ = new Identifier(@1, $1);}
                     ;
 
 unary_expression    :   postfix_expression      {$$ = $1}
-                    |   T_Inc unary_expression  {$$ = new CompoundExpr($1, $2);}
-                    |   T_Dec unary_expression  {$$ = new CompoundExpr($1, $2);}
-                    |   T_Plus unary_expression {$$ = new CompoundExpr($1, $2);}
-                    |   T_Dash unary_expression {$$ = new CompoundExpr($1, $2);}
+                    |   T_Inc unary_expression  {$$ = new ArithmeticExpr(new Operator(@1, "++"), $2);}
+                    |   T_Dec unary_expression  {$$ = new ArithmeticExpr(new Operator(@1, "--"), $2);}
+                    |   T_Plus unary_expression {$$ = new ArithmeticExpr(new IntConstant(@1, 1), new Operator(@1, "*"), $2);}
+                    |   T_Dash unary_expression {$$ = new ArithmeticExpr(new IntConstant(@1, -1), new Operator(@1, "*"), $2);}
                     ;
 
 constant    :   T_IntConstant   { $$ = new IntConstant(@1, $1);  }
