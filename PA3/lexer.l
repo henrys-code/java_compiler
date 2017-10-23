@@ -63,9 +63,6 @@ int currentLineNum, currentColNum;
                         if (YYSTATE == COPY) savedLines.push_back("");
                         else yy_push_state(COPY);}
 
-"\n"                  { currentLineNum++; 
-                        currentColNum = 1; }
-
 [ ]+                  {}
 
 "\t"                  { currentColNum = (currentColNum + (TAB_SIZE - (currentColNum%TAB_SIZE)) + 1); }
@@ -73,10 +70,9 @@ int currentLineNum, currentColNum;
 "//"[^\n]*            {}
 
 "/*"                  { BEGIN(comment); }
-<comment>"\n"         { ++currentLineNum; }
 <comment>"*"+"/"      { BEGIN(INITIAL); }
-<comment>[^\n]*       {}
 <comment><<EOF>>      { ReportError::UntermComment(); BEGIN(INITIAL); }
+<comment>.            { }
 
 "void"[ \n\t]*        { yylloc.last_column -= 1;
                         return T_Void; }
