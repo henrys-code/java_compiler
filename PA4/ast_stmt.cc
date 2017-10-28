@@ -104,23 +104,34 @@ void Program::Check() {
 }
 
 void StmtBlock::Check(){
+    int len = stmts->NumElements();
+    for (int i = 0; i < len; i++)
+    {
+
+    }
 }
 
 void IfStmt::Check(){
+
 }
 
 void WhileStmt::Check(){
+
 }
 
 void ForStmt::Check(){
+
 }
 
 void ReturnStmt::Check(){
+
 }
 
 void BreakStmt::Check(){
+
 }
 
 void DeclStmt::Check(){
+
 }
     

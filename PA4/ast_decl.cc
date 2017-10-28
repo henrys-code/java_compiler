@@ -50,11 +50,20 @@ void VarDecl::Check() {
         ReportError::DeclConflict(this, previous_decl);
     }
     
-    // If this VarDecl has assinTo, which means it is doing an initialization,
+    // If this VarDecl has assignTo, which means it is doing an initialization,
     // then you need to check whether the type of the initialization is the same
     // as the type of this VarDecl
     if(assignTo) {
         // TODO: check type
+        Type* rhs_type = assignTo->CheckExpr();
+        if (rhs_type == Type::errorType)
+        {
+            // PASS
+        }
+        else if (rhs_type != this->GetType())
+        {
+            ReportError::InvalidInitialization(id, this->GetType(), rhs_type);
+        }
     }
 
     symtab->AddSymbol(id->GetName(),this);      
@@ -79,9 +88,14 @@ void FnDecl::Check() {
 
     // Check body(List of Stmt)
     body->Check();
-
+    
     // TODO: Check for missing ReturnStmt
-
+    Type * curr_fn_type = this->GetType();
+    if (!symtab->HasReturn())
+    {
+        if(curr_fn_type != Type::voidType)
+            ReportError::ReturnMissing(this);
+    }
 
     // Finish semantic check for this function declaration,
     // thus pop its scope

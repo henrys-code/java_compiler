@@ -126,34 +126,126 @@ Type* BoolConstant::CheckExpr() {
 }
 
 Type* VarExpr::CheckExpr() {
-    return Type::intType;
+    VarDecl * dec;
+    if(!symtab->IsInAllScopes(id->GetName())){
+        dec = (VarDecl *) symtab->FindSymbolInAllScopes(id->GetName());
+        return dec->GetType();
+    }
+    ReportError::IdentifierNotDeclared(id, LookingForVariable);
+    return Type::errorType;
 }
 
 Type* Call::CheckExpr() {
-    return Type::intType;
+    bool temp = symtab->IsInAllScopes(field->GetName());
+    if (!temp)
+    {
+        ReportError::IdentifierNotDeclared(field, LookingForFunction);
+        return Type::errorType;
+    }
+    else
+    {
+        FnDecl * fn_decl = (FnDecl *) symtab->FindSymbolInAllScopes(field->GetName());
+        int arg_size = fn_decl->GetFormals()->NumElements();
+        int actual_size = actuals->NumElements();
+        if (arg_size < actual_size)
+        {
+            ReportError::LessFormals(field, actual_size, arg_size);
+            return Type::errorType;
+        }
+        else if (arg_size > actual_size)
+        {
+            ReportError::ExtraFormals(field, actual_size, arg_size);
+            return Type::errorType;
+            
+        }
+        else
+        {
+            Type * expected;
+            VarDecl * arg;
+            for (int i = 0; i < actual_size; i++)
+            {
+                arg = fn_decl->GetFormals()->Nth(i);
+                arg->Check();
+                expected = actuals->Nth(i)->CheckExpr();
+                if (arg->GetType() != expected)
+                {
+                    ReportError::FormalsTypeMismatch(field, i, arg->GetType(), expected );
+                }
+            }
+            return fn_decl->GetType();
+        }
+    }
 }
 
 Type* ArithmeticExpr::CheckExpr() {
-    return Type::intType;
+    Type * ltemp = left->CheckExpr();
+    Type * rtemp = right->CheckExpr();    
+    if(ltemp->IsEquivalentTo(Type::intType) && rtemp->IsEquivalentTo(Type::intType))
+    {
+        return Type::intType;
+    }
+    return Type::errorType;
 }
 
 Type* RelationalExpr::CheckExpr() {
-    return Type::intType;
+    Type * ltemp = left->CheckExpr();
+    Type * rtemp = right->CheckExpr();    
+    if(ltemp->IsEquivalentTo(Type::intType) && rtemp->IsEquivalentTo(Type::intType))
+    {
+        return Type::intType;
+    }
+    return Type::errorType;
+       
 }
 
 Type* EqualityExpr::CheckExpr() {
-    return Type::intType;
+    Type * ltemp = left->CheckExpr();
+    Type * rtemp = right->CheckExpr();    
+    if(ltemp->IsEquivalentTo(Type::boolType) && rtemp->IsEquivalentTo(Type::boolType))
+    {
+        return Type::boolType;
+    }
+    else if(ltemp->IsEquivalentTo(Type::intType) && rtemp->IsEquivalentTo(Type::intType))
+    {
+        return Type::intType;
+    }
+    else
+    {
+        return Type::errorType;
+    }
 }
 
 Type* LogicalExpr::CheckExpr() {
-    return Type::intType;
+    Type * ltemp = left->CheckExpr();
+    Type * rtemp = right->CheckExpr();    
+    if(ltemp->IsEquivalentTo(Type::boolType) && rtemp->IsEquivalentTo(Type::boolType))
+    {
+        return Type::boolType;
+    }
+    return Type::errorType;
 }
 
-
 Type* AssignExpr::CheckExpr() {
-    return Type::intType;
+    Type * rtemp = right->CheckExpr();
+    Type * ltemp = left->CheckExpr();
+    if (rtemp->IsEquivalentTo(Type::errorType) || ltemp->IsEquivalentTo(Type::errorType))
+    {
+        return Type::errorType;
+    }
+    if (ltemp != rtemp)
+    {
+        ReportError::IncompatibleOperands(op, ltemp, rtemp);
+    }
+    return ltemp;
 }
 
 Type* PostfixExpr::CheckExpr() {
-    return Type::intType;
+    Type * vartype = left->CheckExpr();
+    if(vartype == Type::boolType){
+        ReportError::IncompatibleOperand(op, vartype);
+        return Type::errorType;
+    }
+    else{
+        return Type::intType;
+    }
 }

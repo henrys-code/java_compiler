@@ -74,3 +74,8 @@ Decl* SymbolTable::FindSymbolInAllScopes(string name) {
     // cout << "Cannot find symbol: " << name << " in SymbolTable::FindSymbolInAllScopes()!!!" << endl;
     return NULL;    
 }
+
+bool SymbolTable::HasReturn()
+{
+    return current_scope->has_return;
+}

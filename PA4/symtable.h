@@ -27,6 +27,7 @@ class SymbolTable {
         void PopScope();
         void AddSymbol(string name, Decl* decl_obj);
 
+        bool HasReturn();
         bool IsInCurrentScope(string name);
         bool IsInAllScopes(string name);
         Decl* FindSymbolInCurrentScope(string name);

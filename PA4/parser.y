@@ -166,6 +166,7 @@ Program   :    DeclList            {
                                       Program *program = new Program($1);
                                       if (ReportError::NumErrors() == 0)
                                           program->Print(0);
+                                      program->Check();
                                     }
           ;
 
