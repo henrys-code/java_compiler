@@ -13,7 +13,9 @@
 
 struct Scope{
     map<string, Decl*> scope_map;
+    string fn_name;
     bool has_return;
+    bool is_loop;
 };
 
 class SymbolTable {
@@ -27,6 +29,7 @@ class SymbolTable {
         void PopScope();
         void AddSymbol(string name, Decl* decl_obj);
 
+        Scope * GetScope();
         bool HasReturn();
         bool IsInCurrentScope(string name);
         bool IsInAllScopes(string name);

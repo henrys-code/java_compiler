@@ -105,25 +105,54 @@ void Program::Check() {
 
 void StmtBlock::Check(){
     int len = stmts->NumElements();
+    Expr * expr;
     for (int i = 0; i < len; i++)
     {
-
+        expr = dynamic_cast<Expr*>(stmts->Nth(i));
+        if(expr ==NULL)
+            stmts->Nth(i)->Check();
+        else 
+            expr->CheckExpr();
     }
 }
 
 void IfStmt::Check(){
-
+    Type * expType = test->CheckExpr();
+    if(expType != Type::boolType){
+        ReportError::TestNotBoolean(test);
+    }
+    body->Check();
+    if(elseBody){
+        elseBody->Check();
+    }
 }
 
 void WhileStmt::Check(){
-
+    Type * expType = test->CheckExpr();
+    if(expType != Type::boolType){
+        ReportError::TestNotBoolean(test);
+    }
+    body->Check();
 }
 
 void ForStmt::Check(){
+    Type * expType = test->CheckExpr();
+    if(expType != Type::boolType){
+        ReportError::TestNotBoolean(test);
+    }
+    Type * init_type = init->CheckExpr();
+    Type * step_type = step->CheckExpr();
+    if (init_type != Type::intType || step_type != Type::intType)
+    {
+        //ReportError::
+    }
 
+    body->Check();
 }
 
 void ReturnStmt::Check(){
+    Type *exprtype = expr->CheckExpr();
+     
 
 }
 
@@ -134,4 +163,3 @@ void BreakStmt::Check(){
 void DeclStmt::Check(){
 
 }
-    

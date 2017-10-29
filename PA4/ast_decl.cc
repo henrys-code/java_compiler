@@ -26,7 +26,7 @@ void VarDecl::PrintChildren(int indentLevel) {
 }
 
 FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
-    Assert(n != NULL && r!= NULL && d != NULL);
+    Assert(n != NULL && r != NULL && d != NULL);
     (returnType=r)->SetParent(this);
     (formals=d)->SetParentAll(this);
     body = NULL;
@@ -80,6 +80,8 @@ void FnDecl::Check() {
 
     // Push a new scope for this function declarartion
     symtab->PushScope();
+    Scope * current_scope = symtab->GetScope();
+    current_scope->fn_name = id->GetName();
 
     // Check formals(Lisf of VarDecl)
     for(int i = 0; i < formals->NumElements(); i++){

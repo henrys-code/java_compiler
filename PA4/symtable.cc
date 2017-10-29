@@ -79,3 +79,8 @@ bool SymbolTable::HasReturn()
 {
     return current_scope->has_return;
 }
+
+Scope * SymbolTable::GetScope()
+{
+    return this->current_scope;
+}
