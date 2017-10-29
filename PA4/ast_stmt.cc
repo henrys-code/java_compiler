@@ -104,6 +104,7 @@ void Program::Check() {
 }
 
 void StmtBlock::Check(){
+    symtab->PushScope();
     int len = stmts->NumElements();
     Expr * expr;
     for (int i = 0; i < len; i++)
@@ -114,9 +115,11 @@ void StmtBlock::Check(){
         else 
             expr->CheckExpr();
     }
+    symtab->PopScope();
 }
 
 void IfStmt::Check(){
+    symtab->PushScope();
     Type * expType = test->CheckExpr();
     if(expType != Type::boolType){
         ReportError::TestNotBoolean(test);
@@ -125,18 +128,26 @@ void IfStmt::Check(){
     if(elseBody){
         elseBody->Check();
     }
+    symtab->PopScope();
 }
 
 void WhileStmt::Check(){
+    symtab->PushScope();
     Type * expType = test->CheckExpr();
+    Scope * scope = symtab->GetScope();
+    scope->is_loop = true;
     if(expType != Type::boolType){
         ReportError::TestNotBoolean(test);
     }
     body->Check();
+    symtab->PushScope();
 }
 
 void ForStmt::Check(){
+    symtab->PushScope();
     Type * expType = test->CheckExpr();
+    Scope * scope = symtab->GetScope();
+    scope->is_loop = true;
     if(expType != Type::boolType){
         ReportError::TestNotBoolean(test);
     }
@@ -148,18 +159,34 @@ void ForStmt::Check(){
     }
 
     body->Check();
+    symtab->PopScope();
 }
 
 void ReturnStmt::Check(){
-    Type *exprtype = expr->CheckExpr();
-     
-
+    Type * exprtype = expr->CheckExpr();
+    FnDecl * curr_fn = (FnDecl *) symtab->FindSymbolInAllScopes(symtab->GetScope()->fn_name);
+    if(!symtab->HasReturn())
+    {
+        ReportError::ReturnMissing(curr_fn);
+    }
+    else
+    {
+        if(exprtype != curr_fn->GetType())
+        {
+            ReportError::ReturnMismatch(this, exprtype, curr_fn->GetType());
+        }
+    }
 }
 
 void BreakStmt::Check(){
-
+    Scope * curr_scope = symtab->GetScope();
+    if(!curr_scope->is_loop)
+    {
+        ReportError::BreakOutsideLoop(this);
+    }
+    
 }
 
 void DeclStmt::Check(){
-
+    varDecl->Check();
 }

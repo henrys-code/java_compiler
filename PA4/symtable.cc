@@ -10,6 +10,10 @@ SymbolTable::SymbolTable() {
     Scope initial_scope;
     symtab_vec.push_back(initial_scope);
     current_scope = &(symtab_vec.back());
+    current_scope->is_loop = false;
+    current_scope->has_return = false;
+    current_scope->fn_name = "";
+    
  }
 
 void SymbolTable::PushScope() {
