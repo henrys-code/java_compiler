@@ -19,7 +19,8 @@ SymbolTable::SymbolTable() {
 void SymbolTable::PushScope() {
     Scope new_scope;
     new_scope.has_return = false;
-
+    new_scope.is_loop = false;
+    new_scope.fn_name = "";
     symtab_vec.push_back(new_scope);
     current_scope = &(symtab_vec.back());
 }

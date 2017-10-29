@@ -127,7 +127,7 @@ Type* BoolConstant::CheckExpr() {
 
 Type* VarExpr::CheckExpr() {
     VarDecl * dec;
-    if(!symtab->IsInAllScopes(id->GetName())){
+    if(symtab->IsInAllScopes(id->GetName())){
         dec = (VarDecl *) symtab->FindSymbolInAllScopes(id->GetName());
         return dec->GetType();
     }
@@ -189,10 +189,11 @@ Type* ArithmeticExpr::CheckExpr() {
 
 Type* RelationalExpr::CheckExpr() {
     Type * ltemp = left->CheckExpr();
-    Type * rtemp = right->CheckExpr();    
+    Type * rtemp = right->CheckExpr(); 
+       
     if(ltemp->IsEquivalentTo(Type::intType) && rtemp->IsEquivalentTo(Type::intType))
     {
-        return Type::intType;
+        return Type::boolType;
     }
     return Type::errorType;
        
@@ -207,7 +208,7 @@ Type* EqualityExpr::CheckExpr() {
     }
     else if(ltemp->IsEquivalentTo(Type::intType) && rtemp->IsEquivalentTo(Type::intType))
     {
-        return Type::intType;
+        return Type::boolType;
     }
     else
     {

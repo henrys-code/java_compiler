@@ -140,7 +140,7 @@ void WhileStmt::Check(){
         ReportError::TestNotBoolean(test);
     }
     body->Check();
-    symtab->PushScope();
+    symtab->PopScope();
 }
 
 void ForStmt::Check(){
@@ -180,11 +180,10 @@ void ReturnStmt::Check(){
 
 void BreakStmt::Check(){
     Scope * curr_scope = symtab->GetScope();
-    if(!curr_scope->is_loop)
+    if(curr_scope->is_loop)
     {
         ReportError::BreakOutsideLoop(this);
-    }
-    
+    }   
 }
 
 void DeclStmt::Check(){
