@@ -13,7 +13,7 @@ touch .myout
 
 for INPUT_FILE in $(ls samples/*.java); do
   echo -n "testing $INPUT_FILE..."
-  ./parser < $INPUT_FILE &> .myout
+  ./glc < $INPUT_FILE &> .myout
   diff=$(diff .myout ${INPUT_FILE/java/out})
   if [ "$diff" != "" ]; then
     echo "failed!"
