@@ -146,7 +146,6 @@ class ReturnStmt : public Stmt
     const char *GetPrintNameForNode() { return "ReturnStmt"; }
     void PrintChildren(int indentLevel);
     virtual void Check();
-
 };
 
 #endif

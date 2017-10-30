@@ -145,8 +145,8 @@ Type* Call::CheckExpr() {
     else
     {
         FnDecl * fn_decl = (FnDecl *) symtab->FindSymbolInAllScopes(field->GetName());
-        int arg_size = fn_decl->GetFormals()->NumElements();
-        int actual_size = actuals->NumElements();
+        int actual_size = fn_decl->GetFormals()->NumElements();
+        int arg_size = actuals->NumElements();
         if (arg_size < actual_size)
         {
             ReportError::LessFormals(field, actual_size, arg_size);
@@ -178,13 +178,40 @@ Type* Call::CheckExpr() {
 }
 
 Type* ArithmeticExpr::CheckExpr() {
-    Type * ltemp = left->CheckExpr();
-    Type * rtemp = right->CheckExpr();    
-    if(ltemp->IsEquivalentTo(Type::intType) && rtemp->IsEquivalentTo(Type::intType))
+    if (left)
     {
-        return Type::intType;
+        Type * ltemp = left->CheckExpr();
+        Type * rtemp = right->CheckExpr();    
+        if(ltemp->IsEquivalentTo(Type::errorType) || rtemp->IsEquivalentTo(Type::errorType))
+        {
+            return Type::errorType;
+        }
+        else if (ltemp->IsEquivalentTo(Type::boolType) || rtemp->IsEquivalentTo(Type::boolType))
+        {
+            ReportError::IncompatibleOperands(op, ltemp, rtemp);
+            return Type::errorType;
+        }
+        else
+        {
+            return Type::intType;
+        }
     }
-    return Type::errorType;
+    else
+    {
+        Type * rtemp = right->CheckExpr();
+        if (rtemp->IsEquivalentTo(Type::errorType))
+        {
+            return rtemp;
+        }
+        else if (rtemp->IsEquivalentTo(Type::boolType))
+        {
+            ReportError::IncompatibleOperand(op, rtemp);
+            return Type::errorType;
+        }
+        else{
+            return Type::intType;
+        }
+    }
 }
 
 Type* RelationalExpr::CheckExpr() {
@@ -212,6 +239,7 @@ Type* EqualityExpr::CheckExpr() {
     }
     else
     {
+        ReportError::IncompatibleOperands(op, ltemp, rtemp);
         return Type::errorType;
     }
 }

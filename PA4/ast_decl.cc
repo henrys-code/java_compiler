@@ -44,7 +44,7 @@ void FnDecl::PrintChildren(int indentLevel) {
 }
 
 void VarDecl::Check() {
-    //Check current scope
+    //Check current scope    
     if( symtab->IsInCurrentScope( id->GetName() ) ){
         Decl* previous_decl = symtab->FindSymbolInCurrentScope( id->GetName() );
         ReportError::DeclConflict(this, previous_decl);
@@ -56,17 +56,13 @@ void VarDecl::Check() {
     if(assignTo) {
         // TODO: check type
         Type* rhs_type = assignTo->CheckExpr();
-        if (rhs_type == Type::errorType)
-        {
-            // PASS
-        }
-        else if (rhs_type != this->GetType())
+        if (rhs_type != Type::errorType && rhs_type != this->GetType())
         {
             ReportError::InvalidInitialization(id, this->GetType(), rhs_type);
         }
     }
 
-    symtab->AddSymbol(id->GetName(),this);      
+    symtab->AddSymbol(id->GetName(),this);
 }
 
 void FnDecl::Check() {
@@ -93,10 +89,9 @@ void FnDecl::Check() {
     
     // TODO: Check for missing ReturnStmt
     Type * curr_fn_type = this->GetType();
-    if (!symtab->HasReturn())
+    if (!current_scope->has_return && curr_fn_type != Type::voidType)
     {
-        if(curr_fn_type != Type::voidType)
-            ReportError::ReturnMissing(this);
+        ReportError::ReturnMissing(this);
     }
 
     // Finish semantic check for this function declaration,

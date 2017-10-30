@@ -17,7 +17,7 @@ for INPUT_FILE in $(ls samples/*.java); do
   diff=$(diff .myout ${INPUT_FILE/java/out})
   if [ "$diff" != "" ]; then
     echo "failed!"
-    echo "$thediff"
+    echo "$diff"
     echo
     failed=$(( $failed + 1 ))
   else

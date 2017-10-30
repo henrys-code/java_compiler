@@ -35,4 +35,5 @@ class SymbolTable {
         bool IsInAllScopes(string name);
         Decl* FindSymbolInCurrentScope(string name);
         Decl* FindSymbolInAllScopes(string name);
+        void Print();
 };

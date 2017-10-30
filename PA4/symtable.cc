@@ -8,19 +8,18 @@
 SymbolTable::SymbolTable() {
     //Add the initial scope
     Scope initial_scope;
+    initial_scope.is_loop = false;
+    initial_scope.has_return = false;
+    initial_scope.fn_name = "main";
     symtab_vec.push_back(initial_scope);
-    current_scope = &(symtab_vec.back());
-    current_scope->is_loop = false;
-    current_scope->has_return = false;
-    current_scope->fn_name = "";
-    
+    current_scope = &(symtab_vec.back());  
  }
 
 void SymbolTable::PushScope() {
     Scope new_scope;
     new_scope.has_return = false;
-    new_scope.is_loop = false;
-    new_scope.fn_name = "";
+    new_scope.is_loop = current_scope->is_loop;
+    new_scope.fn_name = current_scope->fn_name;
     symtab_vec.push_back(new_scope);
     current_scope = &(symtab_vec.back());
 }
@@ -87,5 +86,17 @@ bool SymbolTable::HasReturn()
 
 Scope * SymbolTable::GetScope()
 {
-    return this->current_scope;
+    return current_scope;
+}
+
+void SymbolTable::Print()
+{
+    for (int i = symtab_vec.size() - 1; i >= 0 ; i--)
+    {
+        typedef map<string, Decl*>::const_iterator MapIterator;    
+        for (MapIterator iter = symtab_vec[i].scope_map.begin(); iter != symtab_vec[i].scope_map.end(); iter++)
+        {            
+            std::cerr << i << "\t" << iter->first << std::endl;                        
+        }
+    }      
 }

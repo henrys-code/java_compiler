@@ -70,6 +70,7 @@ void IfStmt::PrintChildren(int indentLevel) {
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) { 
     expr = e;
     if (e != NULL) expr->SetParent(this);
+    symtab->GetScope()->has_return = true;
 }
 
 void ReturnStmt::PrintChildren(int indentLevel) {
@@ -94,7 +95,6 @@ void Program::Check() {
      *      checking itself, which makes for a great use of inheritance
      *      and polymorphism in the node classes.
      */
-
     if ( decls->NumElements() > 0 ) {
       for ( int i = 0; i < decls->NumElements(); ++i ) {
         Decl *d = decls->Nth(i);
@@ -104,18 +104,16 @@ void Program::Check() {
 }
 
 void StmtBlock::Check(){
-    symtab->PushScope();
     int len = stmts->NumElements();
     Expr * expr;
     for (int i = 0; i < len; i++)
     {
         expr = dynamic_cast<Expr*>(stmts->Nth(i));
-        if(expr ==NULL)
+        if(expr == NULL)
             stmts->Nth(i)->Check();
         else 
             expr->CheckExpr();
     }
-    symtab->PopScope();
 }
 
 void IfStmt::Check(){
@@ -163,14 +161,22 @@ void ForStmt::Check(){
 }
 
 void ReturnStmt::Check(){
+    symtab->GetScope()->has_return = true;
     Type * exprtype = expr->CheckExpr();
-    FnDecl * curr_fn = (FnDecl *) symtab->FindSymbolInAllScopes(symtab->GetScope()->fn_name);
-    if(!symtab->HasReturn())
+    if (exprtype->IsEquivalentTo(Type::bvec4Type))
     {
-        ReportError::ReturnMissing(curr_fn);
+        exprtype = Type::voidType;
     }
-    else
+    FnDecl * curr_fn = (FnDecl *) symtab->FindSymbolInAllScopes(symtab->GetScope()->fn_name);
+    if (!exprtype->IsEquivalentTo(Type::errorType) && !exprtype->IsEquivalentTo(Type::voidType))
     {
+        /*
+        if(!symtab->HasReturn())
+        {
+            ReportError::ReturnMissing(curr_fn);
+        }
+        else 
+        */
         if(exprtype != curr_fn->GetType())
         {
             ReportError::ReturnMismatch(this, exprtype, curr_fn->GetType());
@@ -180,7 +186,7 @@ void ReturnStmt::Check(){
 
 void BreakStmt::Check(){
     Scope * curr_scope = symtab->GetScope();
-    if(curr_scope->is_loop)
+    if(!curr_scope->is_loop)
     {
         ReportError::BreakOutsideLoop(this);
     }   

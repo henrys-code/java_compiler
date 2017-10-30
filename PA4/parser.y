@@ -225,7 +225,7 @@ simple_statement    :   expression_statement    { $$ = $1; }
                     |   selection_statement     { $$ = $1; }
                     ;
 
-expression_statement    :   T_Semicolon             { }
+expression_statement    :   T_Semicolon             { $$ = new EmptyExpr(); }
                         |   expression T_Semicolon  { $$ = $1; }
                         ;
 
