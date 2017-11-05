@@ -38,6 +38,7 @@
 #include "location.h"
 #include <vector>
 #include <set>
+#include <stdlib.h>
 
 using namespace std;
 class SymbolTable;
@@ -56,6 +57,7 @@ class Node  {
     // And initialize them in ast.cc
     static int registerCounter;
     static int labelCounter;
+    static int varCounter;
     static vector<string> TACContainer;
 
   public:

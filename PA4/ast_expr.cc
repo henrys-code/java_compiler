@@ -156,7 +156,6 @@ Type* Call::CheckExpr() {
         {
             ReportError::ExtraFormals(field, actual_size, arg_size);
             return Type::errorType;
-            
         }
         else
         {

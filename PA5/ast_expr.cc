@@ -112,7 +112,34 @@ string Operator::Emit() {
 }
 
 string Call::Emit() {
-  return "Call::Emit()";
+    int numParams = actuals->NumElements();
+    for (int i = 0; i < numParams; i++)
+    {
+      Expr * varElem = dynamic_cast<VarExpr *>(actuals->Nth(i));
+      if (varElem)
+      {
+          TACContainer.push_back(string("    ") + string("PushParam ") + varElem->GetName());
+      }
+      else
+      {
+          varElem = dynamic_cast<IntConstant *>(actuals->Nth(i));
+          if (!varElem)
+          {
+              TACContainer.push_back(string("    ") + string("PushParam ") + varElem->GetValue());
+          }
+          else
+          {
+              varElem = dynamic_cast<BoolConstant *>(actuals->Nth(i));
+          }
+      }
+      TACContainer.push_back(string("    ") + string("PushParam ") + varElem->GetName());
+  }
+  string returnValue = "t" + to_string(registerCounter++);
+  string fnId = field->GetName();
+  TACContainer.push_back(string("    ") + returnValue + string(" call ") + fnId + string(" ") + to_string(numParams));
+  TACContainer.push_back(string("    ") + string("PopParam ") + to_string(numParams * sizeof(int)));
+
+  return returnValue;
 }
 
 string VarExpr::Emit() {
@@ -121,10 +148,39 @@ string VarExpr::Emit() {
 }
 
 string EmptyExpr::Emit() {
-  return "EmptyExpr Emit";
+  return "";
 }
 
 string ArithmeticExpr::Emit() {
+  string opString = op->Emit();
+  string leftString;
+  string rightString;
+  if (left)
+  {
+      leftString = left->Emit();
+  }
+  else
+  {
+      leftString = "";
+  }
+  if (right)
+  {
+      rightString = right->Emit();
+  }
+  else
+  {
+      rightString = "";
+  }
+
+  string registerString = "t" + to_string(registerCounter);
+  registerCounter++;
+
+  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
+
+  return registerString;
+}
+
+string RelationalExpr::Emit() {
   string leftString = left->Emit();
   string rightString = right->Emit();
   string opString = op->Emit();
@@ -137,22 +193,45 @@ string ArithmeticExpr::Emit() {
   return registerString;
 }
 
-string RelationalExpr::Emit() {
-  return "RelationalExpr::Emit()";
-}
-
 string AssignExpr::Emit() {
-  return "AssignExpr Emit";
+  string leftString = left->Emit();
+  string rightString = right->Emit();
+
+  string registerString = "t" + to_string(registerCounter);
+  registerCounter++;
+
+  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + string(" = ") + string(" ") + rightString);   
+
+  return registerString;
 }
 
 string LogicalExpr::Emit() {
-  return "LogicalExpr::Emit()"; 
+  string leftString = left->Emit();
+  string rightString = right->Emit();
+  string opString = op->Emit();
+
+  string registerString = "t" + to_string(registerCounter);
+  registerCounter++;
+
+  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
+
+  return registerString;
 }
 
 string EqualityExpr::Emit() {
-  return "EqualityExpr::Emit()";   
+  string leftString = left->Emit();
+  string rightString = right->Emit();
+  string opString = op->Emit();
+
+  string registerString = "t" + to_string(registerCounter);
+  registerCounter++;
+
+  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
+
+  return registerString;
 }
 
 string PostfixExpr::Emit() {
+  
   return "PostfixExpr::Emit()";
 }
