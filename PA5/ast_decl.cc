@@ -27,11 +27,10 @@ void VarDecl::PrintChildren(int indentLevel) {
 
 string VarDecl::Emit() {
     string varName = GetIdentifier()->GetName();
-
+    varCounter++;
     if (assignTo) {
         string rhsRegisterName = assignTo->Emit();
         TACContainer.push_back(string("    ") + varName + string(" := ") + rhsRegisterName);
-        varCounter++;
     }     
 
     return "VarDecl::Emit()";
@@ -49,28 +48,22 @@ void FnDecl::SetFunctionBody(Stmt *b) {
 }
 
 string FnDecl::Emit() {
-    std::cerr << "TEST 1" << std::endl;
     TACContainer.push_back(string(id->GetName()) + string(":"));
     int paramLength = formals->NumElements();
     for (int i = 0; i < paramLength; i++)
     {
         TACContainer.push_back(string("    ") + string("LoadParam ") + formals->Nth(i)->GetIdentifier()->GetName());
     }
-    std::cerr << "TEST 1a" << std::endl;
     int index = TACContainer.size();
     int diff = registerCounter;
     int localVars = varCounter;
-    std::cerr << "TEST 1b" << std::endl;
     string numVars = "numVars";
     body->Emit();
-    std::cerr << "TEST 1c" << std::endl;
     diff = registerCounter - diff;
     localVars = varCounter - localVars;
     int numBytes = (paramLength + diff + localVars) * sizeof(int);
-    std::cerr << "TEST 2" << std::endl;
     TACContainer.insert(TACContainer.begin() + index, string("    ") + string("BeginFunc ") + to_string(numBytes));
     TACContainer.push_back(string("    ") + string("EndFunc"));
-    std::cerr << "TEST 3" << std::endl;
     return "";
 }
 

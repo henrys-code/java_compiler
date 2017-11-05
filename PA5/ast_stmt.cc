@@ -114,32 +114,28 @@ string ForStmt::Emit() {
 	string L2 = "L" + to_string(labelCounter);
 	labelCounter++;
 
-
 	init->Emit();
 
-	TACContainer.push_back(L0+string(":"));
+	TACContainer.push_back(L0 + string(":"));
 	string conditionResult = test->Emit();
 
-	TACContainer.push_back(string("		") + string("if ") + conditionResult + string(" goto ") + L1);
+	TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + L1);
 
-	TACContainer.push_back(string("		") + string(" goto ") + L2);
+	TACContainer.push_back(string("    ") + string("goto ") + L2);
 
 	TACContainer.push_back(L1+string(":"));
 
 	body->Emit();
 	step->Emit();
 
-	TACContainer.push_back(string("		") + string(" goto ") + L0);
-
-
-
+	TACContainer.push_back(string("    ") + string("goto ") + L0);
 	TACContainer.push_back(L2 + string(":"));
 
 	return "ForStmt::Emit()";
 }
 
 string WhileStmt::Emit() {
-	string conditionResult = test->Emit();
+
 	string L0 = "L" + to_string(labelCounter);
 	labelCounter++;
 	string L1 = "L" + to_string(labelCounter);
@@ -148,44 +144,46 @@ string WhileStmt::Emit() {
 	labelCounter++;
 
 
-	TACContainer.push_back(L1+string(":"));
+	TACContainer.push_back(L0+string(":"));
+	string conditionResult = test->Emit();
+	TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + L1);
 
-	TACContainer.push_back(string("		") + string("if ") + conditionResult + string(" goto ") + L1);
-
-	TACContainer.push_back(string("		") + string(" goto ") + L2);
+	TACContainer.push_back(string("    ") + string("goto ") + L2);
 
 	TACContainer.push_back(L1+string(":"));
 
 	body->Emit();
-	TACContainer.push_back(string("		") + string(" goto ") + L0);
-
-
-
+	TACContainer.push_back(string("    ") + string("goto ") + L0);
 	TACContainer.push_back(L2 + string(":"));
-
 
 	return "WhileStmt";
 }
 
 string IfStmt::Emit() {
 	string conditionResult = test->Emit();
-	string labelString1 = "L" + to_string(labelCounter);
-	labelCounter++;
-	string labelString2 = "L" + to_string(labelCounter);
-	labelCounter++;
-
-	TACContainer.push_back(string("		") + string("if ") + conditionResult + string(" goto ") + labelString1);
-
-	TACContainer.push_back(string("		") + string(" goto ") + labelString2);
-
-	TACContainer.push_back(labelString1+string(":"));
-
-	body->Emit();
-	TACContainer.push_back(labelString2+string(":"));
-
-	if(elseBody){
-		elseBody->Emit();	
-
+	string labelString1 = "L" + to_string(labelCounter++);
+	string labelString2 = "L" + to_string(labelCounter++);
+	if(elseBody)
+	{
+		string labelString3 = "L" + to_string(labelCounter++);
+		TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + labelString1);
+		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
+		TACContainer.push_back(labelString1+string(":"));
+		body->Emit();
+		TACContainer.push_back(string("    ") + string("goto ") + labelString3);
+		TACContainer.push_back(labelString2+string(":"));
+		elseBody->Emit();
+		TACContainer.push_back(string("    ") + string("goto ") + labelString3);
+		TACContainer.push_back(labelString3+string(":"));
+	}
+	else
+	{
+		TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + labelString1);	
+		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
+		TACContainer.push_back(labelString1+string(":"));
+		body->Emit();
+		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
+		TACContainer.push_back(labelString2+string(":"));
 	}
 
 

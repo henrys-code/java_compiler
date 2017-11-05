@@ -115,24 +115,24 @@ string Call::Emit() {
     int numParams = actuals->NumElements();
     for (int i = 0; i < numParams; i++)
     {
-      Expr * varElem = dynamic_cast<VarExpr *>(actuals->Nth(i));
-      if (varElem)
-      {
-          TACContainer.push_back(string("    ") + string("PushParam ") + varElem->GetName());
-      }
-      else
-      {
-          varElem = dynamic_cast<IntConstant *>(actuals->Nth(i));
-          if (!varElem)
-          {
-              TACContainer.push_back(string("    ") + string("PushParam ") + varElem->GetValue());
-          }
-          else
-          {
-              varElem = dynamic_cast<BoolConstant *>(actuals->Nth(i));
-          }
-      }
-      TACContainer.push_back(string("    ") + string("PushParam ") + varElem->GetName());
+        Expr * elem = actuals->Nth(i);
+        VarExpr* varElem = dynamic_cast<VarExpr *>(elem);
+        IntConstant * intElem = dynamic_cast<IntConstant *>(elem);
+        BoolConstant * boolElem = dynamic_cast<BoolConstant *>(elem);
+        if (varElem)
+        {
+            TACContainer.push_back(string("    ") + string("PushParam ") + varElem->GetName());
+        }
+        else if (intElem)
+        {
+            TACContainer.push_back(string("    ") + string("PushParam ") + to_string(intElem->GetValue()));
+        }
+        else if (boolElem)
+        {
+            TACContainer.push_back(string("    ") + string("PushParam ") + to_string(boolElem->GetValue()));
+        }
+
+
   }
   string returnValue = "t" + to_string(registerCounter++);
   string fnId = field->GetName();
@@ -197,12 +197,9 @@ string AssignExpr::Emit() {
   string leftString = left->Emit();
   string rightString = right->Emit();
 
-  string registerString = "t" + to_string(registerCounter);
-  registerCounter++;
+  TACContainer.push_back(string("    ") + leftString + string(" := ") + rightString);   
 
-  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + string(" = ") + string(" ") + rightString);   
-
-  return registerString;
+  return leftString;
 }
 
 string LogicalExpr::Emit() {
@@ -232,6 +229,15 @@ string EqualityExpr::Emit() {
 }
 
 string PostfixExpr::Emit() {
-  
+  string varString = left->Emit();
+  string opString = op->Emit();
+  if (opString == "++")
+  {
+    TACContainer.push_back(string("    ") + varString + string(" := ") + varString + string(" + 1"));
+  }
+  else if (opString == "--")
+  {
+    TACContainer.push_back(string("    ") + varString + string(" := ") + varString + string(" - 1"));
+  }
   return "PostfixExpr::Emit()";
 }
