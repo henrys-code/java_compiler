@@ -39,6 +39,7 @@
 #include <vector>
 #include <set>
 #include <stdlib.h>
+#include <map>
 
 using namespace std;
 class SymbolTable;
@@ -59,6 +60,9 @@ class Node  {
     static int labelCounter;
     static int varCounter;
     static vector<string> TACContainer;
+    static set<string> localVars;
+    static map<string, bool> globalVars;
+    static bool inFunc;
 
   public:
     Node(yyltype loc);

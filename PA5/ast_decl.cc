@@ -27,7 +27,10 @@ void VarDecl::PrintChildren(int indentLevel) {
 
 string VarDecl::Emit() {
     string varName = GetIdentifier()->GetName();
-    varCounter++;
+    if (!inFunc)
+    {
+        globalVars[varName] = true;
+    }
     if (assignTo) {
         string rhsRegisterName = assignTo->Emit();
         TACContainer.push_back(string("    ") + varName + string(" := ") + rhsRegisterName);
@@ -48,6 +51,7 @@ void FnDecl::SetFunctionBody(Stmt *b) {
 }
 
 string FnDecl::Emit() {
+    inFunc = true;
     TACContainer.push_back(string(id->GetName()) + string(":"));
     int paramLength = formals->NumElements();
     for (int i = 0; i < paramLength; i++)
@@ -56,14 +60,16 @@ string FnDecl::Emit() {
     }
     int index = TACContainer.size();
     int diff = registerCounter;
-    int localVars = varCounter;
-    string numVars = "numVars";
+    int vars = 0;
+    localVars.clear();
+    //string numVars = "numVars";
     body->Emit();
     diff = registerCounter - diff;
-    localVars = varCounter - localVars;
-    int numBytes = (paramLength + diff + localVars) * sizeof(int);
+    vars = localVars.size();
+    int numBytes = (paramLength + diff + vars) * sizeof(int);
     TACContainer.insert(TACContainer.begin() + index, string("    ") + string("BeginFunc ") + to_string(numBytes));
     TACContainer.push_back(string("    ") + string("EndFunc"));
+    inFunc = false;
     return "";
 }
 

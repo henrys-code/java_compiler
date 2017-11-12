@@ -27,7 +27,10 @@ SymbolTable *Node::symtab = new SymbolTable();
 int Node::registerCounter = 1; // start with 1 for convenience assigning name for registers
 int Node::labelCounter = 0;
 int Node::varCounter = 0;
+set<string> Node::localVars = {};
 vector<string> Node::TACContainer = {};
+map<string, bool> Node::globalVars = {};
+bool Node::inFunc = false;
 
 /* The Print method is used to print the parse tree nodes.
  * If this node has a location (most nodes do, but some do not), it

@@ -113,6 +113,8 @@ string Operator::Emit() {
 
 string Call::Emit() {
     int numParams = actuals->NumElements();
+    string fnId = field->GetName();
+    string temp;
     for (int i = 0; i < numParams; i++)
     {
         Expr * elem = actuals->Nth(i);
@@ -121,29 +123,45 @@ string Call::Emit() {
         BoolConstant * boolElem = dynamic_cast<BoolConstant *>(elem);
         if (varElem)
         {
-            TACContainer.push_back(string("    ") + string("PushParam ") + varElem->GetName());
+            temp = varElem->GetName();
         }
         else if (intElem)
         {
-            TACContainer.push_back(string("    ") + string("PushParam ") + to_string(intElem->GetValue()));
+            temp = to_string(intElem->GetValue());
+            //TACContainer.push_back(string("    ") + string("PushParam @") + temp);
         }
         else if (boolElem)
         {
-            TACContainer.push_back(string("    ") + string("PushParam ") + to_string(boolElem->GetValue()));
+            temp = to_string(boolElem->GetValue());
+            //TACContainer.push_back(string("    ") + string("PushParam #") + temp);
         }
-
-
-  }
-  string returnValue = "t" + to_string(registerCounter++);
-  string fnId = field->GetName();
-  TACContainer.push_back(string("    ") + returnValue + string(" call ") + fnId + string(" ") + to_string(numParams));
-  TACContainer.push_back(string("    ") + string("PopParam ") + to_string(numParams * sizeof(int)));
-
-  return returnValue;
+        if (fnId != "readIntFromSTDIN" && fnId != "printInt") 
+        {
+            TACContainer.push_back(string("    ") + string("PushParam !") + temp);
+        }
+    }
+    string returnValue = "t" + to_string(registerCounter++);
+    if (fnId != "printInt")
+    {
+        TACContainer.push_back(string("    ") + returnValue + string(" call ") + fnId + string(" ") + to_string(numParams));
+    }
+    if (fnId != "readIntFromSTDIN" && fnId != "printInt")
+    {
+        TACContainer.push_back(string("    ") + string("PopParam ") + to_string(numParams * sizeof(int)));
+    }
+    else if (fnId == "printInt")
+    {
+        TACContainer.push_back(string("    ") + string("Print ") + temp);
+    }
+    return returnValue;
 }
 
 string VarExpr::Emit() {
   string localVarName = id->GetName();
+  if (!globalVars[localVarName])
+  {
+      localVars.insert(localVarName);
+  }
   return string(localVarName);
 }
 

@@ -160,32 +160,40 @@ string WhileStmt::Emit() {
 }
 
 string IfStmt::Emit() {
+
 	string conditionResult = test->Emit();
 	string labelString1 = "L" + to_string(labelCounter++);
 	string labelString2 = "L" + to_string(labelCounter++);
+
 	if(elseBody)
 	{
 		string labelString3 = "L" + to_string(labelCounter++);
+
 		TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + labelString1);
 		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
-		TACContainer.push_back(labelString1+string(":"));
+		TACContainer.push_back(labelString1 + string(":"));
+		
 		body->Emit();
+		
 		TACContainer.push_back(string("    ") + string("goto ") + labelString3);
-		TACContainer.push_back(labelString2+string(":"));
+		TACContainer.push_back(labelString2 + string(":"));
+		
 		elseBody->Emit();
+		
 		TACContainer.push_back(string("    ") + string("goto ") + labelString3);
-		TACContainer.push_back(labelString3+string(":"));
+		TACContainer.push_back(labelString3 + string(":"));
 	}
 	else
 	{
 		TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + labelString1);	
 		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
-		TACContainer.push_back(labelString1+string(":"));
+		TACContainer.push_back(labelString1 + string(":"));
+		
 		body->Emit();
+		
 		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
-		TACContainer.push_back(labelString2+string(":"));
+		TACContainer.push_back(labelString2 + string(":"));
 	}
-
 
 	//	update label container and push label container to tac container
 	//	TAcontianer push labe before the branch
