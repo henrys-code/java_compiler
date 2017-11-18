@@ -38,14 +38,89 @@
 #include "location.h"
 #include <vector>
 #include <set>
-#include <stdlib.h>
+#include <stdio.h>
 #include <map>
 
 using namespace std;
 class SymbolTable;
 
 struct TACObject{
-    // Design your own TAC data structure for each line of TAC
+    int type;
+    //1 is label
+    string l0;
+    //2 is action and action item,
+    string acname;
+    string acitem;
+    //3 is is branch (if "t1" goto "label")
+    string l1;//t1
+    string l2;//label
+    //4 destination, source1 source 2
+    string dest;
+    string s1;
+    string s2;
+    //5 jump, example ("goto l1")
+    string l3;
+    //6 return statement
+    string ret;
+    //7 function call: t1 call foo 5params
+    string l4; //t1
+    string func;
+    int np;//number of params
+    //8 logical expr or relational or equality
+    string l5;//t1
+    string l6;//leftstring
+    string op;
+    string l7;//rightString
+    //9 assignment expr
+    string l8;
+    string l9;
+    //10 postfix
+    string l10;
+    string addsub;
+    //11 arithemticexpr
+    string l11;
+    string l12;
+    string op1;
+    string l13;
+    //12 begin function
+    //string l14;
+    string l15;
+    //13 endfunc
+    string l16;
+    //14 var decl
+    string l17;
+    string l18;
+    string IF = "if ";
+    string GOTO = " goto ";
+    string complete1 ;//= l0 + ":";
+    string complete2 ;//= "      "+acname + " " + acitem; 
+    string complete3 ;//= "      " + IF + l1 + GOTO + l2;
+    string complete5 ;//= GOTO + l3;
+    string complete6 ;//= "      Return " + ret;
+    string complete7 ;//= "      " + l4 + " call " + func + " " ;//+ to_string(np);
+    string complete8 ;//= "      "+l5+" := " + l6 +" "+ op + " " + l7;
+    string complete9 ;//= "      "+l8+" := " + l9;
+    string complete10;// = "	" + l10 + " := " + addsub;
+    string complete11 ;//=	"	" + l11+ " := " + l12 + " " + op1 + " " + l13;
+    string complete12;// = "	BeginFunc " + l15;
+    string complete13;// = l16;
+    string complete14 ;//= l17 +" =: "+l18;
+
+    void complete(){
+        complete1 = l0 + ":";
+        complete2 = "    " + acname + " " + acitem; 
+        complete3 = "    " + IF + l1 + GOTO + l2;
+        complete5 = "   " + GOTO + l3;
+        complete6 = "    Return " + ret;
+        complete7 = "    " + l4 + " call " + func + " ";// + to_string(np);
+        complete8 = "    "+ l5 +" := " + l6 +" "+ op +" " + l7;
+        complete9 = "    "+ l8 +" := " + l9;
+        complete10 ="    " + l10 + " := " + l10 + addsub;
+        complete11 ="    " + l11+ " := " + l12 + " " + op1 + " " + l13;
+        complete12 ="    BeginFunc " + l15;
+        complete13 ="    " + l16;
+        complete14 ="    "+l17 +" =: "+l18;
+    }
 };
 
 class Node  {
@@ -59,7 +134,7 @@ class Node  {
     static int registerCounter;
     static int labelCounter;
     static int varCounter;
-    static vector<string> TACContainer;
+    static vector<TACObject> TACContainer;
     static set<string> localVars;
     static map<string, bool> globalVars;
     static bool inFunc;

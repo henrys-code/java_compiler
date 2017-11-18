@@ -29,10 +29,13 @@ class Program : public Node
      List<Decl*> *decls;
 
   public:
-     Program(List<Decl*> *declList);
-     const char *GetPrintNameForNode() { return "Program"; }
-     void PrintChildren(int indentLevel);
-     virtual string Emit();
+      Program(List<Decl*> *declList);
+      const char *GetPrintNameForNode() { return "Program"; }
+      void PrintChildren(int indentLevel);
+      virtual string Emit();
+      vector<TACObject> constantFolding(vector<TACObject> TACContainer);
+      vector<TACObject> constantPropogation(vector<TACObject> TACContainer);
+      vector<TACObject> deadCodeElimination(vector<TACObject> TACContainer);
 };
 
 class Stmt : public Node

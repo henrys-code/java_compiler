@@ -33,7 +33,13 @@ string VarDecl::Emit() {
     }
     if (assignTo) {
         string rhsRegisterName = assignTo->Emit();
-        TACContainer.push_back(string("    ") + varName + string(" := ") + rhsRegisterName);
+        TACObject a;
+        a.type = 14;
+        a.l17 = varName;
+        a.l18 = rhsRegisterName;
+        a.complete();
+        TACContainer.push_back(a);
+        // TACContainer.push_back(string("    ") + varName + string(" := ") + rhsRegisterName);
     }     
 
     return "VarDecl::Emit()";
@@ -52,11 +58,24 @@ void FnDecl::SetFunctionBody(Stmt *b) {
 
 string FnDecl::Emit() {
     inFunc = true;
-    TACContainer.push_back(string(id->GetName()) + string(":"));
+    
+    TACObject b;
+    b. type = 1;
+    b.l0 = string(id->GetName());
+    b.complete();
+    TACContainer.push_back(b);
+    // TACContainer.push_back(string(id->GetName()) + string(":"));
+    
     int paramLength = formals->NumElements();
     for (int i = 0; i < paramLength; i++)
     {
-        TACContainer.push_back(string("    ") + string("LoadParam ") + formals->Nth(i)->GetIdentifier()->GetName());
+        TACObject a;
+        a.type = 2;
+        a.acname= "LoadParam ";
+        a.acitem = formals->Nth(i)->GetIdentifier()->GetName();
+        a.complete();
+        TACContainer.push_back(a);
+        //TACContainer.push_back(string("    ") + string("LoadParam ") + formals->Nth(i)->GetIdentifier()->GetName());
     }
     int index = TACContainer.size();
     int diff = registerCounter;
@@ -67,8 +86,20 @@ string FnDecl::Emit() {
     diff = registerCounter - diff;
     vars = localVars.size();
     int numBytes = (paramLength + diff + vars) * sizeof(int);
-    TACContainer.insert(TACContainer.begin() + index, string("    ") + string("BeginFunc ") + to_string(numBytes));
-    TACContainer.push_back(string("    ") + string("EndFunc"));
+    
+    TACObject a;
+    a.type = 12;
+    a.l15 = to_string(numBytes);
+    a.complete();
+    // TACContainer.insert(TACContainer.begin() + index, string("    ") + string("BeginFunc ") + to_string(numBytes));
+    // TACContainer.push_back(string("    ") + string("EndFunc"));
+    TACContainer.insert(TACContainer.begin() + index, a);
+    TACObject d;
+    d.type = 13;
+    d.l16 = "EndFunc";
+    d.complete();
+    TACContainer.push_back(d);
+    
     inFunc = false;
     return "";
 }

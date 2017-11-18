@@ -28,7 +28,7 @@ int Node::registerCounter = 1; // start with 1 for convenience assigning name fo
 int Node::labelCounter = 0;
 int Node::varCounter = 0;
 set<string> Node::localVars = {};
-vector<string> Node::TACContainer = {};
+vector<TACObject> Node::TACContainer = {};
 map<string, bool> Node::globalVars = {};
 bool Node::inFunc = false;
 

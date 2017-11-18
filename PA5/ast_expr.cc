@@ -137,21 +137,47 @@ string Call::Emit() {
         }
         if (fnId != "readIntFromSTDIN" && fnId != "printInt") 
         {
-            TACContainer.push_back(string("    ") + string("PushParam !") + temp);
+            TACObject a;
+            a.type = 2;
+            a.acname = "PushParam";
+            a.acitem = temp;
+            a.complete();
+            TACContainer.push_back(a);
         }
     }
     string returnValue = "t" + to_string(registerCounter++);
     if (fnId != "printInt")
     {
-        TACContainer.push_back(string("    ") + returnValue + string(" call ") + fnId + string(" ") + to_string(numParams));
+        // TACContainer.push_back(string("    ") + returnValue + string(" call ") + fnId + string(" ") + to_string(numParams));
+        TACObject b;
+        b.type = 7;
+        b.l4 = returnValue;
+        b.func = fnId;
+        b.np = numParams;
+        b.complete();
+        TACContainer.push_back(b);
     }
     if (fnId != "readIntFromSTDIN" && fnId != "printInt")
     {
-        TACContainer.push_back(string("    ") + string("PopParam ") + to_string(numParams * sizeof(int)));
+        // TACContainer.push_back(string("    ") + string("PopParam ") + to_string(numParams * sizeof(int)));
+        TACObject c;
+        c.type = 2;
+        c.acname = "PopParam";
+        c.acitem = to_string(numParams * sizeof(int));
+        c.complete();
+        TACContainer.push_back(c);
     }
     else if (fnId == "printInt")
     {
-        TACContainer.push_back(string("    ") + string("Print ") + temp);
+
+        TACObject y;
+        y.type = 2;
+        y.acname = "Print";
+        y.acitem = temp;
+        y.complete();
+        TACContainer.push_back(y);
+        // TACContainer.push_back(string("    ") + string("Print ") + temp);
+
     }
     return returnValue;
 }
@@ -193,7 +219,15 @@ string ArithmeticExpr::Emit() {
   string registerString = "t" + to_string(registerCounter);
   registerCounter++;
 
-  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
+  TACObject a;
+  a.type = 11;
+  a.l11 = registerString;
+  a.l12 = leftString;
+  a.l13 = rightString;
+  a.op1 = opString; 
+  a.complete();
+  TACContainer.push_back(a);
+  // TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
 
   return registerString;
 }
@@ -206,56 +240,101 @@ string RelationalExpr::Emit() {
   string registerString = "t" + to_string(registerCounter);
   registerCounter++;
 
-  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
+  TACObject a;
+  a.type = 8;
+  a.l5 = registerString;
+  a.l6 = leftString;
+  a.op = opString;
+  a.l7 = rightString;
+  a.complete();
+  TACContainer.push_back(a);
+
+  // TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
 
   return registerString;
 }
 
 string AssignExpr::Emit() {
-  string leftString = left->Emit();
-  string rightString = right->Emit();
+    string leftString = left->Emit();
+    string rightString = right->Emit();
 
-  TACContainer.push_back(string("    ") + leftString + string(" := ") + rightString);   
+    TACObject a;
+    a.type = 9;
+    a.l8 = leftString;
+    a.l9 = rightString;
+    a.complete();
+    TACContainer.push_back(a);
 
-  return leftString;
+    // TACContainer.push_back(string("    ") + leftString + string(" := ") + rightString);   
+
+    return leftString;
 }
 
 string LogicalExpr::Emit() {
-  string leftString = left->Emit();
-  string rightString = right->Emit();
-  string opString = op->Emit();
+    string leftString = left->Emit();
+    string rightString = right->Emit();
+    string opString = op->Emit();
 
-  string registerString = "t" + to_string(registerCounter);
-  registerCounter++;
+    string registerString = "t" + to_string(registerCounter);
+    registerCounter++;
 
-  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
+    TACObject a;
+    a.type = 8;
+    a.l5 = registerString;
+    a.l6 = leftString;
+    a.op = opString;
+    a.l7 = rightString;
+    a.complete();
+    TACContainer.push_back(a);
 
-  return registerString;
+    // TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
+
+    return registerString;
 }
 
 string EqualityExpr::Emit() {
-  string leftString = left->Emit();
-  string rightString = right->Emit();
-  string opString = op->Emit();
+    string leftString = left->Emit();
+    string rightString = right->Emit();
+    string opString = op->Emit();
 
-  string registerString = "t" + to_string(registerCounter);
-  registerCounter++;
+    string registerString = "t" + to_string(registerCounter);
+    registerCounter++;
 
-  TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
+    TACObject a;
+    a.type = 8;
+    a.l5 = registerString;
+    a.l6 = leftString;
+    a.op = opString;
+    a.l7 = rightString;
+    a.complete();
+    TACContainer.push_back(a);
+    // TACContainer.push_back(string("    ") + registerString + string(" := ") + leftString + string(" ") + opString + string(" ") + rightString);   
 
-  return registerString;
+    return registerString;
 }
 
 string PostfixExpr::Emit() {
-  string varString = left->Emit();
-  string opString = op->Emit();
-  if (opString == "++")
-  {
-    TACContainer.push_back(string("    ") + varString + string(" := ") + varString + string(" + 1"));
-  }
-  else if (opString == "--")
-  {
-    TACContainer.push_back(string("    ") + varString + string(" := ") + varString + string(" - 1"));
-  }
-  return "PostfixExpr::Emit()";
+    string varString = left->Emit();
+    string opString = op->Emit();
+    if (opString == "++")
+    {
+        TACObject a;
+        a.type = 10;
+        a.l10 = varString;
+        a.addsub = " + 1";
+        a.complete();
+        TACContainer.push_back(a);
+        // TACContainer.push_back(string("    ") + varString + string(" := ") + varString + string(" + 1"));
+    }
+    else if (opString == "--")
+    {
+        TACObject a;
+        a.type = 10;
+        a.l10 = varString;
+        a.addsub = " - 1";
+        a.complete();
+        TACContainer.push_back(a);
+        // TACContainer.push_back(string("    ") + varString + string(" := ") + varString + string(" - 1"));
+    }
+    return "PostfixExpr::Emit()";
 }

@@ -89,11 +89,89 @@ string Program::Emit() {
 		}
 	}
 
-	for (int i = 0; i < TACContainer.size(); i++) {
-		cout << TACContainer[i] << endl;
-	}
+	// You can just uncomment the method that you need to run for different test cases when you checkoff
+	 vector<TACObject> optimized_TACContainer = constantFolding(TACContainer);
+	// vector<TACObject> optimized_TACContainer = constantPropogation(TACContainer);
+	// vector<TACObject> optimized_TACContainer = deadCodeElimination(TACContainer);
+	// print out optimized_TACContainer
+	//vector<TACObject> optimized_TACContainer = TACContainer;
 
+	for (int i = 0; i < optimized_TACContainer.size(); i++) {
+		int t = optimized_TACContainer[i].type;
+		switch(t){
+			case 1: cout << optimized_TACContainer[i].complete1 << endl;
+				break;
+			case 2: cout << optimized_TACContainer[i].complete2 << endl;
+				break;
+			case 3: cout << optimized_TACContainer[i].complete3 << endl;
+				break;
+			case 5: cout << optimized_TACContainer[i].complete5 << endl;
+				break;
+			case 6: cout << optimized_TACContainer[i].complete6 << endl;
+				break;
+			case 7: cout << optimized_TACContainer[i].complete7 << endl;
+				break;
+			case 8: cout << optimized_TACContainer[i].complete8 << endl;
+				break;
+			case 9: cout << optimized_TACContainer[i].complete9 << endl;
+				break;
+			case 10: cout << optimized_TACContainer[i].complete10 << endl;
+				break;
+			case 11: cout << optimized_TACContainer[i].complete11 << endl;
+				break;
+			case 12: cout << optimized_TACContainer[i].complete12 << endl;
+				break;
+			case 13: cout << optimized_TACContainer[i].complete13 << endl;
+				break;
+			case 14: cout << optimized_TACContainer[i].complete14 << endl;
+				break;
+		}
+	}
 	return "Program::Emit()";
+}
+
+vector<TACObject> Program::constantFolding(vector<TACObject> TACContainer) {
+	for (int i = 0; i < TACContainer.size(); i++) {
+		TACObject obj = TACContainer[i];
+		if (obj.type == 11) {
+			//l12 op1 l13
+			int left = atoi(obj.l12.c_str());
+			int right = atoi(obj.l13.c_str());
+			string oper = obj.op1;
+			if (left > 0 && right > 0) {
+				int result = 0;
+				if (oper == "*") {
+					result = left * right;
+				}
+				else if (oper == "/") {
+					result = left / right;
+				}
+				else if (oper == "+") {
+					result = left + right;
+				}
+				else if (oper == "-") {
+					result = left - right;
+				}
+				TACContainer[i].type = 14;
+				TACContainer[i].l17 = obj.l11;
+				TACContainer[i].l18 = to_string(result);
+				TACContainer[i].complete();
+			}
+		}
+	}
+	return TACContainer;
+}
+
+vector<TACObject> Program::constantPropogation(vector<TACObject> TACContainer) {
+	vector<TACObject> optimized_TAC = {};
+
+	return optimized_TAC;
+}
+
+vector<TACObject> Program::deadCodeElimination(vector<TACObject> TACContainer) {
+	vector<TACObject> optimized_TAC = {};
+
+	return optimized_TAC;
 }
 
 string StmtBlock::Emit() {
@@ -106,110 +184,222 @@ string StmtBlock::Emit() {
 }
 
 string ForStmt::Emit() {
-    
-	string L0 = "L" + to_string(labelCounter);
-	labelCounter++;
-	string L1 = "L" + to_string(labelCounter);
-	labelCounter++;
-	string L2 = "L" + to_string(labelCounter);
+	TACObject a;//label 0
+	a.type = 1;
+	a.l0 = "L" + to_string(labelCounter);
 	labelCounter++;
 
+	TACObject j;//label 1
+	j.type = 1;
+	j.l0 = "L" + to_string(labelCounter);
+	labelCounter++;
+
+	TACObject k;//label 2
+	k.type = 1;
+	k.l0 = "L" + to_string(labelCounter);
+	labelCounter++;
+
+	
 	init->Emit();
+	a.complete();
+	TACContainer.push_back(a);
+		
+	TACObject b;
+	b.type=3;
+	string condition = test->Emit();	
+	b.l1 = condition;
+	b.l2 = j.l0;
+	b.complete();
+	TACContainer.push_back(b);
+	
+	TACObject q;
+	q.type = 5;
+	q.l3 = k.l0;
+	q.complete();
+	TACContainer.push_back(q);
 
-	TACContainer.push_back(L0 + string(":"));
-	string conditionResult = test->Emit();
-
-	TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + L1);
-
-	TACContainer.push_back(string("    ") + string("goto ") + L2);
-
-	TACContainer.push_back(L1+string(":"));
+	j.complete();
+	TACContainer.push_back(j);
 
 	body->Emit();
 	step->Emit();
+		
+	TACObject c;
+	c.type = 5;
+	c.l3 = a.l0;
+	c.complete();
+	TACContainer.push_back(c);
 
-	TACContainer.push_back(string("    ") + string("goto ") + L0);
-	TACContainer.push_back(L2 + string(":"));
+	TACObject d;
+	d.type = 1;
+	d.l0 = k.l0;
+	d.complete();
+	TACContainer.push_back(d);
 
 	return "ForStmt::Emit()";
 }
 
 string WhileStmt::Emit() {
-
-	string L0 = "L" + to_string(labelCounter);
+string L0 = "L" + to_string(labelCounter);
 	labelCounter++;
 	string L1 = "L" + to_string(labelCounter);
 	labelCounter++;
 	string L2 = "L" + to_string(labelCounter);
 	labelCounter++;
 
+	//l0
+	TACObject a;//label
+	a.type = 1;
+	a.l0 = L0;
+	a.complete();
+	TACContainer.push_back(a);
+	
+	//if t1 goto l1
+	TACObject b;
+	b.type=3;
+	string condition = test->Emit();	
+	b.l1 = condition;
+	b.l2 = L1;
+	b.complete();
+	TACContainer.push_back(b);
 
-	TACContainer.push_back(L0+string(":"));
-	string conditionResult = test->Emit();
-	TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + L1);
+	//goto l1
+	TACObject c;
+	c.type = 5;
+	c.l3 = L2;
+	c.complete();
+	TACContainer.push_back(c);
 
-	TACContainer.push_back(string("    ") + string("goto ") + L2);
-
-	TACContainer.push_back(L1+string(":"));
+	//l1
+	TACObject z;
+	z.type = 1;
+	z.l0 = L1;
+	z.complete();
+	TACContainer.push_back(z);
 
 	body->Emit();
-	TACContainer.push_back(string("    ") + string("goto ") + L0);
-	TACContainer.push_back(L2 + string(":"));
+	
+	//
+	TACObject e;
+	e.type = 5;
+	e.l3 = L0;
+	e.complete();
+	TACContainer.push_back(e);
+	
+
+	TACObject d;
+	d.type = 1;
+	d.l0 =L2;
+	d.complete();
+	TACContainer.push_back(d);
 
 	return "WhileStmt";
 }
 
 string IfStmt::Emit() {
-
-	string conditionResult = test->Emit();
+string condRes = test->Emit();
+	
 	string labelString1 = "L" + to_string(labelCounter++);
 	string labelString2 = "L" + to_string(labelCounter++);
-
 	if(elseBody)
 	{
 		string labelString3 = "L" + to_string(labelCounter++);
+		
+		TACObject a;
+		a.type = 3;
+		a.l1 = condRes;
+		a.l2 = labelString1;
+		a.complete();
+		TACContainer.push_back(a);
 
-		TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + labelString1);
-		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
-		TACContainer.push_back(labelString1 + string(":"));
+		TACObject b;
+		b.type = 5;
+		b.l3 = labelString2;
+		b.complete();
+		TACContainer.push_back(b);
+
+		TACObject c;
+		c.type = 1;
+		c.l0 = labelString1;
+		c.complete();
+		TACContainer.push_back(c);
 		
 		body->Emit();
+
+		TACObject d;
+		d.type = 5;
+		d.l3 = labelString3;
+		d.complete();
+		TACContainer.push_back(d);
 		
-		TACContainer.push_back(string("    ") + string("goto ") + labelString3);
-		TACContainer.push_back(labelString2 + string(":"));
+		TACObject e;
+		e.type = 1;
+		e.l0 = labelString2;
+		e.complete();
+		TACContainer.push_back(e);
 		
 		elseBody->Emit();
+
+		TACObject f;
+		f.type = 5;
+		f.l3 = labelString3;
+		f.complete();
+		TACContainer.push_back(f);
 		
-		TACContainer.push_back(string("    ") + string("goto ") + labelString3);
-		TACContainer.push_back(labelString3 + string(":"));
+		TACObject g;
+		g.type = 1;
+		g.l0 = labelString3;
+		g.complete();
+		TACContainer.push_back(g);	
 	}
 	else
 	{
-		TACContainer.push_back(string("    ") + string("if ") + conditionResult + string(" goto ") + labelString1);	
-		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
-		TACContainer.push_back(labelString1 + string(":"));
+		TACObject a;
+		a.type = 3;
+		a.l1 = condRes;
+		a.l2 = labelString1;
+		a.complete();
+		TACContainer.push_back(a);
+
+		TACObject b;
+		b.type = 5;
+		b.l3 = labelString2;
+		b.complete();
+		TACContainer.push_back(b);
 		
+		TACObject c;
+		c.type = 1;
+		c.l0 = labelString1;
+		c.complete();
+		TACContainer.push_back(c);
+
 		body->Emit();
+
+		TACObject d;
+		d.type = 5;
+		d.l3 = labelString2;
+		d.complete();
+		TACContainer.push_back(d);
 		
-		TACContainer.push_back(string("    ") + string("goto ") + labelString2);
-		TACContainer.push_back(labelString2 + string(":"));
+		TACObject e;
+		e.type = 1;
+		e.l0 = labelString2;
+		e.complete();
+		TACContainer.push_back(e);
 	}
-
-	//	update label container and push label container to tac container
-	//	TAcontianer push labe before the branch
-
-	//begining of if statement, have both labvesls ready for use 
-	//should generate branching logic
-	//can be bool constant. we have a field called test which is of typ eexpr ast_stmt.h test field!! call emit of test field, and we can test->emit() should have string variable result, now we are done with emiting with our, afer getting temp register stirng, we can directory generate lines, if test tru ethen go to code thats execute the body, otherwise skip it, 
-	//the next step, we should genearate label, when we generate label, we already need to generate label, have vrarinale to record l0, call body body emit 
 	return "IFstatement";
 }
 
 string ReturnStmt::Emit() {
+	TACObject a;
+	a.type = 6;
 	//what if its not returning a variable
 	string ret = expr->Emit();
-	TACContainer.push_back(string("    ") + string("Return ") + ret);
-
+	//optimized_TACContainer.push_back(string("    ") + string("Return ") + ret);
+	a.ret = ret;
+	a.complete();
+	TACContainer.push_back(a);
+	
 	return "ReturnStmt Emit()";
 }
 
