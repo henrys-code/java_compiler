@@ -138,6 +138,8 @@ class Node  {
     static set<string> localVars;
     static map<string, bool> globalVars;
     static bool inFunc;
+    static map<string, int> propMap;
+    static map<string, bool> deadMap;
 
   public:
     Node(yyltype loc);

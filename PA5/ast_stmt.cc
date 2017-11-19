@@ -90,8 +90,8 @@ string Program::Emit() {
 	}
 
 	// You can just uncomment the method that you need to run for different test cases when you checkoff
-	 vector<TACObject> optimized_TACContainer = constantFolding(TACContainer);
-	// vector<TACObject> optimized_TACContainer = constantPropogation(TACContainer);
+	// vector<TACObject> optimized_TACContainer = constantFolding(TACContainer);
+	 vector<TACObject> optimized_TACContainer = constantPropogation(TACContainer);
 	// vector<TACObject> optimized_TACContainer = deadCodeElimination(TACContainer);
 	// print out optimized_TACContainer
 	//vector<TACObject> optimized_TACContainer = TACContainer;
@@ -163,15 +163,79 @@ vector<TACObject> Program::constantFolding(vector<TACObject> TACContainer) {
 }
 
 vector<TACObject> Program::constantPropogation(vector<TACObject> TACContainer) {
-	vector<TACObject> optimized_TAC = {};
+	// propMap.insert(pair<string,int>("a",99));
+	for (int i = 0; i < TACContainer.size(); i++) {
+		if(TACContainer[i].type == 14){
+			//string check1 = TACContainer[i].l17;
+			string check2 = TACContainer[i].l18;
+			//cout << "propmap[" << check1 << "] = " << propMap[check1] << endl;
+			if(propMap[check2]){
+				cout<<"in here"<<endl;
+				TACContainer[i].l18 = to_string(propMap[check2]);
+				TACContainer[i].complete();
+			}
+			else{
+				propMap.insert(pair<string,int>(TACContainer[i].l17, atoi(TACContainer[i].l18.c_str() ) ) );
+			}
+		}
+		else if(TACContainer[i].type == 11){
+			string check1 = TACContainer[i].l12;
+			string check2 = TACContainer[i].l13;
 
-	return optimized_TAC;
+			if (propMap[check1])
+			{
+				TACContainer[i].l12 = to_string(propMap[check1]);
+				cout << "propmap[" << check1 << "] = " << propMap[check1] << endl;
+			}
+			else{
+				cout << check1 << " is not in map!" << endl;
+			}
+			if (propMap[check2])
+			{
+				TACContainer[i].l13 = to_string(propMap[check2]);
+
+				cout << "propmap[" << check2 << "] = " << propMap[check2] << endl;
+			}
+			else{
+				cout << check1 << " is not in map!" << endl;
+			}
+			TACContainer[i].complete();
+			// propMap.insert(pair<string,int>(TACContainer[i],99));
+
+		}
+		else if(TACContainer[i].type == 9){
+			string check1 = TACContainer[i].l9;
+			if(propMap[check1]){
+				TACContainer[i].l9 = to_string(propMap[check1]);
+				TACContainer[i].complete();
+			}
+		}
+	}
+
+	return TACContainer;
 }
 
 vector<TACObject> Program::deadCodeElimination(vector<TACObject> TACContainer) {
-	vector<TACObject> optimized_TAC = {};
 
-	return optimized_TAC;
+	for (int i = 0; i < TACContainer.size(); i++) {
+		//cout << TACContainer[i].type << endl;
+		if (TACContainer[i].type == 14){
+			deadMap.insert(pair<string, bool>(TACContainer[i].l17, true));
+		}
+		else if(TACContainer[i].type == 9){
+			string check1 = TACContainer[i].l8;
+			if(deadMap[check1]) {
+				deadMap[check1] = false;
+			}
+			else
+			{
+				TACContainer.erase(TACContainer.begin() + i - 1);
+			}
+
+		}
+	}
+
+	return TACContainer;
 }
 
 string StmtBlock::Emit() {

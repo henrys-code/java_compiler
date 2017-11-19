@@ -31,6 +31,8 @@ set<string> Node::localVars = {};
 vector<TACObject> Node::TACContainer = {};
 map<string, bool> Node::globalVars = {};
 bool Node::inFunc = false;
+map<string, int> Node::propMap = {};
+map<string, bool> Node::deadMap = {};
 
 /* The Print method is used to print the parse tree nodes.
  * If this node has a location (most nodes do, but some do not), it
