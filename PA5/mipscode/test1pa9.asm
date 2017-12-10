@@ -10,7 +10,7 @@ main:
     syscall
 
     #store value from STDIN in to a
-    move $t0, $v0;
+    move $t0, $v0
 
     #load a into $a0 to print out
     li $v0, 1

@@ -1,5 +1,6 @@
 void main() {
-    int a, b;
+    int a;
+    int b;
     a = readIntFromSTDIN();
     b = readIntFromSTDIN();
     if (a < b) {

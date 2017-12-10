@@ -91,43 +91,49 @@ string Program::Emit() {
 
 	// You can just uncomment the method that you need to run for different test cases when you checkoff
 	// vector<TACObject> optimized_TACContainer = constantFolding(TACContainer);
-	 vector<TACObject> optimized_TACContainer = constantPropogation(TACContainer);
+	// vector<TACObject> optimized_TACContainer = constantPropogation(TACContainer);
 	// vector<TACObject> optimized_TACContainer = deadCodeElimination(TACContainer);
 	// print out optimized_TACContainer
-	//vector<TACObject> optimized_TACContainer = TACContainer;
+	vector<TACObject> optimized_TACContainer = TACContainer;
 
 	for (int i = 0; i < optimized_TACContainer.size(); i++) {
 		int t = optimized_TACContainer[i].type;
-		switch(t){
-			case 1: cout << optimized_TACContainer[i].complete1 << endl;
-				break;
-			case 2: cout << optimized_TACContainer[i].complete2 << endl;
-				break;
-			case 3: cout << optimized_TACContainer[i].complete3 << endl;
-				break;
-			case 5: cout << optimized_TACContainer[i].complete5 << endl;
-				break;
-			case 6: cout << optimized_TACContainer[i].complete6 << endl;
-				break;
-			case 7: cout << optimized_TACContainer[i].complete7 << endl;
-				break;
-			case 8: cout << optimized_TACContainer[i].complete8 << endl;
-				break;
-			case 9: cout << optimized_TACContainer[i].complete9 << endl;
-				break;
-			case 10: cout << optimized_TACContainer[i].complete10 << endl;
-				break;
-			case 11: cout << optimized_TACContainer[i].complete11 << endl;
-				break;
-			case 12: cout << optimized_TACContainer[i].complete12 << endl;
-				break;
-			case 13: cout << optimized_TACContainer[i].complete13 << endl;
-				break;
-			case 14: cout << optimized_TACContainer[i].complete14 << endl;
-				break;
-		}
+		cout << generateMipsCode(optimized_TACContainer[i], t) << endl;		
 	}
 	return "Program::Emit()";
+}
+
+string Program::generateMipsCode(TACObject TACobj, int t) {
+	t = TACobj.type;
+	switch(t) {
+		case 1: return TACobj.complete1;
+			break;
+		case 2: return "    li $v0, 1\n    move $a0, $t" + to_string(mipsReg) + "\n    syscall";//TACobj.complete2;
+			break;
+		case 3: return "complete3";//TACobj.complete3;
+			break;
+		case 5: return "complete5";//TACobj.complete5;
+			break;
+		case 6: return TACobj.complete6;
+			break;
+		case 7: return "    li $v0, 5\n    syscall";//TACobj.complete7;
+			break;
+		case 8: return TACobj.complete8;
+			break;
+		case 9: return "    move $t" + to_string(mipsReg) +", $v0"; //TACobj.complete9;
+			break;
+		case 10: return TACobj.complete10;
+			break;
+		case 11: return TACobj.complete11;
+			break;
+		case 12: return "";//TACobj.complete12;
+			break;
+		case 13: return "    li $v0, 10\n    syscall";//TACobj.complete13;
+			break;
+		case 14: return TACobj.complete14;
+			break;
+	}
+	return "";
 }
 
 vector<TACObject> Program::constantFolding(vector<TACObject> TACContainer) {

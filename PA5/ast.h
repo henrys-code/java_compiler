@@ -112,14 +112,14 @@ struct TACObject{
         complete3 = "    " + IF + l1 + GOTO + l2;
         complete5 = "   " + GOTO + l3;
         complete6 = "    Return " + ret;
-        complete7 = "    " + l4 + " call " + func + " ";// + to_string(np);
-        complete8 = "    "+ l5 +" := " + l6 +" "+ op +" " + l7;
-        complete9 = "    "+ l8 +" := " + l9;
+        complete7 = "    " + l4 + " call " + func + " ";
+        complete8 = "    " + l5 + " := " + l6 +" " + op +" " + l7;
+        complete9 = "    " + l8 + " := " + l9;
         complete10 ="    " + l10 + " := " + l10 + addsub;
         complete11 ="    " + l11+ " := " + l12 + " " + op1 + " " + l13;
         complete12 ="    BeginFunc " + l15;
         complete13 ="    " + l16;
-        complete14 ="    "+l17 +" =: "+l18;
+        complete14 ="    " + l17 + " =: " + l18;
     }
 };
 
@@ -134,12 +134,14 @@ class Node  {
     static int registerCounter;
     static int labelCounter;
     static int varCounter;
+    static int mipsReg;
     static vector<TACObject> TACContainer;
     static set<string> localVars;
     static map<string, bool> globalVars;
     static bool inFunc;
     static map<string, int> propMap;
     static map<string, bool> deadMap;
+    static map<string, string> mipsMap;
 
   public:
     Node(yyltype loc);

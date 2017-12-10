@@ -36,6 +36,7 @@ class Program : public Node
       vector<TACObject> constantFolding(vector<TACObject> TACContainer);
       vector<TACObject> constantPropogation(vector<TACObject> TACContainer);
       vector<TACObject> deadCodeElimination(vector<TACObject> TACContainer);
+      string generateMipsCode(TACObject TACobj, int t);
 };
 
 class Stmt : public Node
