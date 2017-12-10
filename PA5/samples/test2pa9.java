@@ -7,6 +7,6 @@ void main() {
         printInt(b);
     }
     if (b < a) {
-        printInt(b);
+        printInt(a);
     }
 }

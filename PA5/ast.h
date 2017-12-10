@@ -101,10 +101,12 @@ struct TACObject{
     string complete8 ;//= "      "+l5+" := " + l6 +" "+ op + " " + l7;
     string complete9 ;//= "      "+l8+" := " + l9;
     string complete10;// = "	" + l10 + " := " + addsub;
-    string complete11 ;//=	"	" + l11+ " := " + l12 + " " + op1 + " " + l13;
+    string complete11;//=	"	" + l11+ " := " + l12 + " " + op1 + " " + l13;
     string complete12;// = "	BeginFunc " + l15;
     string complete13;// = l16;
-    string complete14 ;//= l17 +" =: "+l18;
+    string complete14;//= l17 +" =: "+l18;
+
+    //string t3 = ".data\n.text\n\n main:\n    li $v0, 5\n    syscall\n    move $t0, $v0\n    li $v0, 5\n    syscall\n    move $t1, $v0\n    slt $t2, $t0, $t1\n    beq $t2, $zero, L0\n    j L1\nL0:\n    li $v0, 1\n    move $a0, $t0\n    syscall\n    j L1\nL1:\n    slt $t4, $t1, $t0\n    beq $t4, $zero, L2\n    j L3\nL2:\n    li $v0, 1\n    move $a0, $t1\n    syscall\n    j L3\nL3:\n    li $v0, 10\n    syscall";
 
     void complete(){
         complete1 = l0 + ":";

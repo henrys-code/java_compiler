@@ -95,42 +95,65 @@ string Program::Emit() {
 	// vector<TACObject> optimized_TACContainer = deadCodeElimination(TACContainer);
 	// print out optimized_TACContainer
 	vector<TACObject> optimized_TACContainer = TACContainer;
-
 	for (int i = 0; i < optimized_TACContainer.size(); i++) {
 		int t = optimized_TACContainer[i].type;
-		cout << generateMipsCode(optimized_TACContainer[i], t) << endl;		
+		if (t != 12) {
+			cout << generateMipsCode(optimized_TACContainer[i], t) << endl;
+		}
 	}
 	return "Program::Emit()";
 }
 
 string Program::generateMipsCode(TACObject TACobj, int t) {
-	t = TACobj.type;
+	//t = TACobj.type;
+	string temp;
+	string temp3;
 	switch(t) {
 		case 1: return TACobj.complete1;
 			break;
-		case 2: return "    li $v0, 1\n    move $a0, $t" + to_string(mipsReg) + "\n    syscall";//TACobj.complete2;
+		case 2: return 	"    li $v0, 1\n    move $a0, " + mipsMap[TACobj.acitem] + "\n    syscall";
+						//TACobj.complete2;
 			break;
-		case 3: return "complete3";//TACobj.complete3;
+		case 3: return 	"    beq $t" + to_string(mipsReg-1) + ", $zero, " + TACobj.l2;
+						//TACobj.complete3;
 			break;
-		case 5: return "complete5";//TACobj.complete5;
+		case 5: return 	"    j " + TACobj.l3;
+						//TACobj.complete5;
 			break;
-		case 6: return TACobj.complete6;
+		case 6: return 	"complete6";
+						//TACobj.complete6;
 			break;
-		case 7: return "    li $v0, 5\n    syscall";//TACobj.complete7;
+		case 7: return  "    li $v0, 5\n    syscall";
+						//TACobj.complete7;
 			break;
-		case 8: return TACobj.complete8;
+		case 8: return 	"    slt $t" + to_string(mipsReg++) + 
+						", " + mipsMap[TACobj.l7] + ", " + mipsMap[TACobj.l6];
+						//TACobj.complete8;
 			break;
-		case 9: return "    move $t" + to_string(mipsReg) +", $v0"; //TACobj.complete9;
+		case 9: temp = "$t" + to_string(mipsReg++);
+				mipsMap[TACobj.l8] = temp;
+				temp3 = mipsMap.find(TACobj.l8)==mipsMap.end() ? mipsMap[TACobj.l8] : "$v0";
+
+				return 	"    move " + temp + ", " + temp3;
+				//return TACobj.complete9;
 			break;
-		case 10: return TACobj.complete10;
+		case 10: return //"    ";
+						TACobj.complete10;
 			break;
-		case 11: return TACobj.complete11;
+		case 11: return "complete11";
+						//TACobj.complete11;
 			break;
-		case 12: return "";//TACobj.complete12;
+		case 12: return "complete12";
+						//TACobj.complete12;
 			break;
-		case 13: return "    li $v0, 10\n    syscall";//TACobj.complete13;
+		case 13: return "    li $v0, 10\n    syscall";
+						//TACobj.complete13;
 			break;
-		case 14: return TACobj.complete14;
+		case 14: 	temp = "$t" + to_string(mipsReg++);
+					mipsMap[TACobj.l17] = temp;
+					int temp2 = mipsMap.find(TACobj.l18)==mipsMap.end() ? atoi(mipsMap[TACobj.l18].c_str()) : 0;
+					return "    li " + temp + ", " + to_string(temp2);
+					//TACobj.complete14;
 			break;
 	}
 	return "";
